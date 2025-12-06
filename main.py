@@ -1067,26 +1067,35 @@ class DeepResearchSwarm:
         """
         parts = []
         
-        # Get findings index from knowledge tools (compact summary)
-        try:
-            findings_index = self.knowledge_tools.get_findings_index()
-            parts.append(findings_index)
+        # Prefer in-memory findings (from current session) to avoid empty KB responses
+        if self.all_findings:
+            academic = sum(1 for f in self.all_findings if f.get("search_type") == "academic")
+            general = len(self.all_findings) - academic
+            verified = sum(1 for f in self.all_findings if f.get("verified", False))
+            unique_sources = len({f.get("source_url") for f in self.all_findings if f.get("source_url")})
+            
+            parts.append("## Research Findings Summary\n")
+            parts.append(f"Total findings: {len(self.all_findings)}")
+            parts.append(f"- Academic: {academic}")
+            parts.append(f"- General: {general}")
+            parts.append(f"- Verified: {verified}")
+            parts.append(f"- Unique sources: {unique_sources}")
             parts.append("")
-        except Exception as e:
-            logger.warning(f"Could not generate findings index: {e}")
-            # Fallback to basic stats
-            if self.all_findings:
-                academic = sum(1 for f in self.all_findings if f.get("search_type") == "academic")
-                general = len(self.all_findings) - academic
-                verified = sum(1 for f in self.all_findings if f.get("verified", False))
-                
-                parts.append("## Research Findings Summary\n")
-                parts.append(f"**Total findings:** {len(self.all_findings)}")
-                parts.append(f"- Academic: {academic}")
-                parts.append(f"- General: {general}")
-                parts.append(f"- Verified: {verified}")
+            parts.append("### Key Research Content")
+            for f in self.all_findings[:3]:
+                snippet = f.get("content", "")[:240].strip()
+                parts.append(f"- {snippet}")
+            parts.append("")
+        else:
+            # Get findings index from knowledge tools (compact summary)
+            try:
+                findings_index = self.knowledge_tools.get_findings_index()
+                parts.append(findings_index)
                 parts.append("")
-                parts.append("Use `search_knowledge(topic)` to retrieve detailed findings.")
+            except Exception as e:
+                logger.warning(f"Could not generate findings index: {e}")
+                parts.append("## Research Findings Summary\n")
+                parts.append("Total findings: 0")
                 parts.append("")
         
         # Add expert perspectives if available
@@ -1095,7 +1104,7 @@ class DeepResearchSwarm:
             parts.append("")
             parts.append("## Expert Perspectives\n")
             for insight in expert_insights:
-                parts.append(f"### {insight['expert'].title()} Expert Analysis")
+                parts.append(f"### {insight['expert'].title()} Perspective")
                 parts.append(insight['summary'])
                 if insight.get('insights'):
                     parts.append("\n**Key Insights:**")
@@ -1239,15 +1248,33 @@ class DeepResearchSwarm:
         
         lines = []
         
-        # ----- TITLE -----
+        # ----- TITLE & EXECUTIVE SUMMARY -----
         lines.extend([
-            f"# {query}",
+            f"# Research Report: {query}",
             "",
-            f"*A Comprehensive Research Survey*",
+            "*A Comprehensive Research Survey*",
+            "",
+            "## Executive Summary",
+            "",
+            f"This report synthesizes {len(findings)} research findings from {len(sources)} unique sources on **{query.lower()}**.",
+            f"- Academic findings: {len(academic_findings)}",
+            f"- General findings: {len(general_findings)}",
+            f"- Verified sources: {verified_count}",
             "",
             "---",
             "",
         ])
+
+        # If no findings, return early with context for debugging
+        if not findings:
+            lines.extend([
+                "No findings were collected. This may be due to:",
+                "- Search API limitations",
+                "- Network connectivity issues",
+                "- Query specificity",
+                "",
+            ])
+            return "\n".join(lines)
         
         # ----- ABSTRACT -----
         # Find the most striking statistic or finding for the opening
@@ -1295,6 +1322,30 @@ class DeepResearchSwarm:
             f"{section_num + 4}. [References](#references)",
             "",
         ])
+
+        # ----- KEY FINDINGS SNAPSHOT -----
+        key_points = []
+        for f in findings[:5]:
+            title = f.get("source_title", "Source") or "Source"
+            snippet = f.get("content", "").replace("\n", " ").strip()
+            if len(snippet) > 240:
+                snippet = snippet[:240] + "..."
+            key_points.append(f"- **{title}**: {snippet}")
+
+        lines.extend([
+            "---",
+            "",
+            "## Key Findings",
+            "",
+        ])
+        if key_points:
+            lines.extend(key_points)
+            lines.append("")
+        else:
+            lines.extend([
+                "No key findings available yet. Collect more research to populate this section.",
+                "",
+            ])
         
         # ----- INTRODUCTION -----
         # Find an interesting finding to lead with
@@ -1597,7 +1648,7 @@ class DeepResearchSwarm:
             lines.append(f"### Academic Sources ({len(academic_sources)})")
             lines.append("")
             for i, (url, info) in enumerate(list(academic_sources.items())[:30], 1):
-                verified = "✓" if info["verified"] else ""
+                verified = "✅" if info["verified"] else "❌"
                 lines.append(f"{i}. {info['title']} {verified}")
                 lines.append(f"   {url}")
                 lines.append("")
@@ -1608,7 +1659,7 @@ class DeepResearchSwarm:
             lines.append(f"### Industry & General Sources ({len(general_sources)})")
             lines.append("")
             for i, (url, info) in enumerate(list(general_sources.items())[:30], 1):
-                verified = "✓" if info["verified"] else ""
+                verified = "✅" if info["verified"] else "❌"
                 lines.append(f"{i}. {info['title']} {verified}")
                 lines.append(f"   {url}")
                 lines.append("")
@@ -1761,6 +1812,16 @@ def main():
         action="store_true",
         help="Run in mock mode (no API calls)"
     )
+    parser.add_argument(
+        "--deep",
+        action="store_true",
+        help="Use DeepResearchSwarm (multi-iteration with quality control)"
+    )
+    parser.add_argument(
+        "--express",
+        action="store_true",
+        help="Express deep mode (1 iteration, faster); implies --deep"
+    )
     
     args = parser.parse_args()
     
@@ -1842,10 +1903,20 @@ def main():
         return 1
     
     # Create swarm
-    swarm = ResearchSwarm(
-        max_workers=args.max_workers,
-        max_subtasks=args.max_subtasks,
-    )
+    swarm = None
+    deep_swarm = None
+    if args.deep or args.express:
+        deep_swarm = DeepResearchSwarm(
+            max_workers=args.max_workers,
+            max_subtasks=args.max_subtasks,
+            max_iterations=1 if args.express else 3,
+            quality_threshold=80,
+        )
+    else:
+        swarm = ResearchSwarm(
+            max_workers=args.max_workers,
+            max_subtasks=args.max_subtasks,
+        )
     
     if args.interactive:
         print("\n" + "=" * 60)
@@ -1868,7 +1939,9 @@ def main():
                 print("Starting research...")
                 print("-" * 60 + "\n")
                 
-                if args.simple:
+                if args.deep or args.express:
+                    result = deep_swarm.deep_research(query, use_experts=not args.express)
+                elif args.simple:
                     result = swarm.research_simple(query)
                 else:
                     result = swarm.research(query)
@@ -1899,7 +1972,9 @@ def main():
         print("=" * 60)
         print(f"\n🔍 Query: {args.query}\n")
         
-        if args.simple:
+        if args.deep or args.express:
+            result = deep_swarm.deep_research(args.query, use_experts=not args.express)
+        elif args.simple:
             result = swarm.research_simple(args.query)
         else:
             result = swarm.research(args.query)
