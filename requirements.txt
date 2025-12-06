@@ -1,0 +1,22 @@
+# Core Framework
+agno>=2.3.7
+litellm>=1.80.7
+
+# Search
+perplexityai>=0.21.0
+
+# Secure Code Execution
+daytona>=0.121.0
+docker>=7.0.0
+
+# Vector Database
+lancedb>=0.25.3
+
+# LLM Providers (OpenAI for embeddings)
+openai>=2.8.1
+anthropic>=0.75.0
+
+# Utilities
+python-dotenv>=1.2.1
+httpx>=0.28.1
+pydantic>=2.12.5

@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Environment
+.env
+.env.*
+
+# IDE / tooling
+.DS_Store
+.vscode/
+.idea/
+
+# Reports and logs
+reports/
+*.log
+
+# Checkpoints and generated data
+checkpoints/
+research_kb/
+test_agents_kb/
+*.lance
+*.manifest
+*.txn
+
+# PDF outputs
+*.pdf
+
+# Node / frontend (if any)
+node_modules/
+
+

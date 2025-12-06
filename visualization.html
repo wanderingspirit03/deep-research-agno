@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Research Swarm - System Architecture</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --bg-card-hover: #22222e;
+            --accent-cyan: #00d4ff;
+            --accent-purple: #a855f7;
+            --accent-pink: #ec4899;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-blue: #3b82f6;
+            --text-primary: #f0f0f5;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --border-color: #2d2d3a;
+            --glow-cyan: 0 0 30px rgba(0, 212, 255, 0.3);
+            --glow-purple: 0 0 30px rgba(168, 85, 247, 0.3);
+            --glow-green: 0 0 30px rgba(16, 185, 129, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 0% 0%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 100% 100%, rgba(0, 212, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: var(--glow-cyan);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            margin-top: 8px;
+            font-weight: 300;
+        }
+
+        .tech-stack {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .tech-badge {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .tech-badge:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+        }
+
+        /* Main Flow Diagram */
+        .flow-section {
+            margin-bottom: 80px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border-radius: 2px;
+        }
+
+        .main-flow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding: 40px 0;
+        }
+
+        .flow-step {
+            position: relative;
+            animation: fadeInUp 0.6s ease-out both;
+        }
+
+        .flow-step:nth-child(1) { animation-delay: 0.1s; }
+        .flow-step:nth-child(2) { animation-delay: 0.2s; }
+        .flow-step:nth-child(3) { animation-delay: 0.3s; }
+        .flow-step:nth-child(4) { animation-delay: 0.4s; }
+        .flow-step:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .flow-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            width: 200px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .flow-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-cyan);
+            box-shadow: var(--glow-cyan);
+        }
+
+        .flow-card.planner:hover { border-color: var(--accent-purple); box-shadow: var(--glow-purple); }
+        .flow-card.worker:hover { border-color: var(--accent-blue); box-shadow: 0 0 30px rgba(59, 130, 246, 0.3); }
+        .flow-card.critic:hover { border-color: var(--accent-orange); box-shadow: 0 0 30px rgba(245, 158, 11, 0.3); }
+        .flow-card.editor:hover { border-color: var(--accent-green); box-shadow: var(--glow-green); }
+
+        .flow-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 16px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .flow-card.planner .flow-icon { background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(168, 85, 247, 0.1)); }
+        .flow-card.worker .flow-icon { background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.1)); }
+        .flow-card.critic .flow-icon { background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.1)); }
+        .flow-card.editor .flow-icon { background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1)); }
+
+        .flow-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .flow-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .flow-arrow {
+            color: var(--text-muted);
+            font-size: 24px;
+            animation: arrowPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes arrowPulse {
+            0%, 100% { opacity: 0.5; transform: translateX(0); }
+            50% { opacity: 1; transform: translateX(5px); }
+        }
+
+        /* Agent Details Grid */
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .agent-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 28px;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease-out both;
+        }
+
+        .agent-card:nth-child(1) { animation-delay: 0.1s; }
+        .agent-card:nth-child(2) { animation-delay: 0.15s; }
+        .agent-card:nth-child(3) { animation-delay: 0.2s; }
+        .agent-card:nth-child(4) { animation-delay: 0.25s; }
+        .agent-card:nth-child(5) { animation-delay: 0.3s; }
+
+        .agent-card:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-4px);
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .agent-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .agent-avatar.planner { background: linear-gradient(135deg, var(--accent-purple), #7c3aed); }
+        .agent-avatar.worker { background: linear-gradient(135deg, var(--accent-blue), #2563eb); }
+        .agent-avatar.critic { background: linear-gradient(135deg, var(--accent-orange), #d97706); }
+        .agent-avatar.editor { background: linear-gradient(135deg, var(--accent-green), #059669); }
+        .agent-avatar.expert { background: linear-gradient(135deg, var(--accent-pink), #db2777); }
+
+        .agent-info h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .agent-model {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-cyan);
+            background: rgba(0, 212, 255, 0.1);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .agent-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .agent-capabilities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .capability-tag {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Phase Timeline */
+        .phases-section {
+            margin-bottom: 80px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--accent-purple), var(--accent-cyan), var(--accent-green));
+        }
+
+        .phase-item {
+            position: relative;
+            margin-bottom: 40px;
+            animation: fadeInUp 0.6s ease-out both;
+        }
+
+        .phase-item:nth-child(1) { animation-delay: 0.1s; }
+        .phase-item:nth-child(2) { animation-delay: 0.2s; }
+        .phase-item:nth-child(3) { animation-delay: 0.3s; }
+        .phase-item:nth-child(4) { animation-delay: 0.4s; }
+
+        .phase-marker {
+            position: absolute;
+            left: -40px;
+            top: 0;
+            width: 32px;
+            height: 32px;
+            background: var(--bg-primary);
+            border: 2px solid var(--accent-cyan);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .phase-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .phase-content h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .phase-content p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .phase-agents {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .phase-agent-tag {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            color: var(--accent-cyan);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Infrastructure */
+        .infrastructure-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .infra-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            animation: fadeInUp 0.6s ease-out both;
+        }
+
+        .infra-card:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        .infra-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+
+        .infra-card h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .infra-card p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .tools-list {
+            margin-top: 12px;
+            padding-left: 16px;
+        }
+
+        .tools-list li {
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            margin-bottom: 4px;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            margin-bottom: 80px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            animation: fadeInUp 0.6s ease-out both;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 8px;
+        }
+
+        /* Expert Panel */
+        .expert-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .expert-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .expert-card:hover {
+            background: var(--bg-card);
+            border-color: var(--accent-pink);
+        }
+
+        .expert-emoji {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .expert-card h5 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .expert-card p {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        /* Data Flow Visualization */
+        .dataflow-section {
+            margin-bottom: 80px;
+        }
+
+        .dataflow-diagram {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 40px;
+            overflow-x: auto;
+        }
+
+        .dataflow-svg {
+            width: 100%;
+            min-width: 800px;
+            height: 400px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid var(--border-color);
+            margin-top: 40px;
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .main-flow {
+                flex-direction: column;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+
+            .timeline {
+                padding-left: 30px;
+            }
+
+            .phase-marker {
+                left: -30px;
+                width: 28px;
+                height: 28px;
+            }
+        }
+
+        /* Animations for interactive elements */
+        .hover-glow {
+            transition: box-shadow 0.3s ease;
+        }
+
+        .hover-glow:hover {
+            box-shadow: var(--glow-cyan);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-gradient"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">🔬</div>
+                <div>
+                    <h1>Deep Research Swarm</h1>
+                    <p class="subtitle">PhD-Level Multi-Agent Research System</p>
+                </div>
+            </div>
+            <div class="tech-stack">
+                <span class="tech-badge">Agno Framework</span>
+                <span class="tech-badge">LiteLLM Proxy</span>
+                <span class="tech-badge">Perplexity API</span>
+                <span class="tech-badge">LanceDB</span>
+                <span class="tech-badge">OpenAI Embeddings</span>
+            </div>
+        </header>
+
+        <!-- Main Flow -->
+        <section class="flow-section">
+            <h2 class="section-title">System Flow</h2>
+            <div class="main-flow">
+                <div class="flow-step">
+                    <div class="flow-card" style="background: linear-gradient(135deg, var(--bg-card), rgba(0, 212, 255, 0.05));">
+                        <div class="flow-icon">👤</div>
+                        <h3>User Query</h3>
+                        <p>Research question input</p>
+                    </div>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-step">
+                    <div class="flow-card planner">
+                        <div class="flow-icon">🎯</div>
+                        <h3>Planner</h3>
+                        <p>Decomposes into subtasks</p>
+                    </div>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-step">
+                    <div class="flow-card worker">
+                        <div class="flow-icon">⚡</div>
+                        <h3>Workers (×7)</h3>
+                        <p>Parallel research execution</p>
+                    </div>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-step">
+                    <div class="flow-card critic">
+                        <div class="flow-icon">🔬</div>
+                        <h3>Critic</h3>
+                        <p>Quality evaluation</p>
+                    </div>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-step">
+                    <div class="flow-card editor">
+                        <div class="flow-icon">📝</div>
+                        <h3>Editor</h3>
+                        <p>Report synthesis</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Agent Details -->
+        <section>
+            <h2 class="section-title">Agent Architecture</h2>
+            <div class="agents-grid">
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <div class="agent-avatar planner">🎯</div>
+                        <div class="agent-info">
+                            <h3>Planner Agent</h3>
+                            <span class="agent-model">Claude Opus 4.5</span>
+                        </div>
+                    </div>
+                    <p class="agent-description">
+                        Strategic research strategist that decomposes complex queries into 7-15 focused subtasks. 
+                        Organizes research into four phases: Foundation, Current State, Critical Analysis, and Future Directions.
+                    </p>
+                    <div class="agent-capabilities">
+                        <span class="capability-tag">Query Analysis</span>
+                        <span class="capability-tag">Task Decomposition</span>
+                        <span class="capability-tag">Priority Assignment</span>
+                        <span class="capability-tag">Search Strategy</span>
+                    </div>
+                </div>
+
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <div class="agent-avatar worker">⚡</div>
+                        <div class="agent-info">
+                            <h3>Worker Agents</h3>
+                            <span class="agent-model">Claude Haiku 4.5</span>
+                        </div>
+                    </div>
+                    <p class="agent-description">
+                        Up to 7 parallel research agents executing subtasks. Each worker searches via Perplexity, 
+                        extracts deep content from URLs, and saves 5-12 comprehensive findings to the knowledge base.
+                    </p>
+                    <div class="agent-capabilities">
+                        <span class="capability-tag">Web Search</span>
+                        <span class="capability-tag">URL Extraction</span>
+                        <span class="capability-tag">Content Filtering</span>
+                        <span class="capability-tag">Quality Scoring</span>
+                    </div>
+                </div>
+
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <div class="agent-avatar critic">🔬</div>
+                        <div class="agent-info">
+                            <h3>Critic Agent</h3>
+                            <span class="agent-model">Claude Opus 4.5</span>
+                        </div>
+                    </div>
+                    <p class="agent-description">
+                        Rigorous academic reviewer that evaluates research quality (0-100 score). 
+                        Identifies gaps, suggests follow-up queries, and determines when research is ready for synthesis.
+                    </p>
+                    <div class="agent-capabilities">
+                        <span class="capability-tag">Coverage Analysis</span>
+                        <span class="capability-tag">Source Quality</span>
+                        <span class="capability-tag">Gap Detection</span>
+                        <span class="capability-tag">Draft Review</span>
+                    </div>
+                </div>
+
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <div class="agent-avatar editor">📝</div>
+                        <div class="agent-info">
+                            <h3>Editor Agent</h3>
+                            <span class="agent-model">Claude Opus 4.5</span>
+                        </div>
+                    </div>
+                    <p class="agent-description">
+                        World-class research writer combining academic rigor with prose craft. 
+                        Produces 5,000-10,000 word reports with thematic organization and proper citations.
+                    </p>
+                    <div class="agent-capabilities">
+                        <span class="capability-tag">Knowledge Retrieval</span>
+                        <span class="capability-tag">Section Planning</span>
+                        <span class="capability-tag">Prose Synthesis</span>
+                        <span class="capability-tag">Citation Management</span>
+                    </div>
+                </div>
+
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <div class="agent-avatar expert">🎓</div>
+                        <div class="agent-info">
+                            <h3>Domain Experts</h3>
+                            <span class="agent-model">GPT-5 Mini</span>
+                        </div>
+                    </div>
+                    <p class="agent-description">
+                        Panel of specialized experts providing multi-perspective analysis: 
+                        Technical, Industry, Skeptic, Futurist, and Academic viewpoints on research findings.
+                    </p>
+                    <div class="agent-capabilities">
+                        <span class="capability-tag">Technical Analysis</span>
+                        <span class="capability-tag">Industry Insights</span>
+                        <span class="capability-tag">Critical Review</span>
+                        <span class="capability-tag">Future Predictions</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Research Phases -->
+        <section class="phases-section">
+            <h2 class="section-title">Deep Research Phases</h2>
+            <div class="timeline">
+                <div class="phase-item">
+                    <div class="phase-marker">1</div>
+                    <div class="phase-content">
+                        <h4>🎯 Strategic Planning</h4>
+                        <p>
+                            The Planner Agent analyzes the research query and creates a comprehensive plan with 
+                            7-15 focused subtasks. Each subtask is assigned a search type (academic/general), 
+                            priority level, and specific focus area.
+                        </p>
+                        <div class="phase-agents">
+                            <span class="phase-agent-tag">Planner Agent</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="phase-item">
+                    <div class="phase-marker">2</div>
+                    <div class="phase-content">
+                        <h4>⚡ Iterative Research Loop</h4>
+                        <p>
+                            Up to 7 Worker Agents execute subtasks in parallel. Each worker performs Perplexity searches, 
+                            extracts full content from URLs, evaluates source quality, and saves findings to LanceDB. 
+                            The Critic evaluates quality after each iteration—if score &lt;80, gap-filling continues.
+                        </p>
+                        <div class="phase-agents">
+                            <span class="phase-agent-tag">Worker Agents (×7)</span>
+                            <span class="phase-agent-tag">Critic Agent</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="phase-item">
+                    <div class="phase-marker">3</div>
+                    <div class="phase-content">
+                        <h4>🎓 Multi-Perspective Analysis</h4>
+                        <p>
+                            Domain Expert panel provides diverse viewpoints on the research. Technical experts analyze 
+                            methodology, Industry experts assess practical applications, Skeptics challenge claims, 
+                            and Futurists predict implications.
+                        </p>
+                        <div class="phase-agents">
+                            <span class="phase-agent-tag">Technical Expert</span>
+                            <span class="phase-agent-tag">Industry Expert</span>
+                            <span class="phase-agent-tag">Skeptic Expert</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="phase-item">
+                    <div class="phase-marker">4</div>
+                    <div class="phase-content">
+                        <h4>📝 Academic Synthesis</h4>
+                        <p>
+                            The Editor Agent retrieves findings via semantic search and crafts a 5,000-10,000 word 
+                            academic report. Organized by theme with proper sections: Abstract, Introduction, 
+                            Literature Review, Critical Analysis, Future Directions, and References.
+                        </p>
+                        <div class="phase-agents">
+                            <span class="phase-agent-tag">Editor Agent</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats -->
+        <section class="stats-section">
+            <h2 class="section-title">System Capabilities</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">7</div>
+                    <div class="stat-label">Parallel Workers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">15</div>
+                    <div class="stat-label">Max Subtasks</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Research Iterations</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">80+</div>
+                    <div class="stat-label">Quality Threshold</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">10K</div>
+                    <div class="stat-label">Report Words</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">3072</div>
+                    <div class="stat-label">Embedding Dims</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Domain Experts -->
+        <section style="margin-bottom: 80px;">
+            <h2 class="section-title">Expert Panel</h2>
+            <div class="expert-grid">
+                <div class="expert-card">
+                    <div class="expert-emoji">🔧</div>
+                    <h5>Technical Expert</h5>
+                    <p>Senior ML Researcher<br/>Algorithm & methodology focus</p>
+                </div>
+                <div class="expert-card">
+                    <div class="expert-emoji">🏭</div>
+                    <h5>Industry Expert</h5>
+                    <p>VP of Engineering<br/>Production & cost focus</p>
+                </div>
+                <div class="expert-card">
+                    <div class="expert-emoji">🧐</div>
+                    <h5>Skeptic Expert</h5>
+                    <p>Critical Researcher<br/>Challenges claims</p>
+                </div>
+                <div class="expert-card">
+                    <div class="expert-emoji">🔮</div>
+                    <h5>Futurist Expert</h5>
+                    <p>Trend Analyst<br/>Future implications</p>
+                </div>
+                <div class="expert-card">
+                    <div class="expert-emoji">📚</div>
+                    <h5>Academic Expert</h5>
+                    <p>University Professor<br/>Literature positioning</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Infrastructure -->
+        <section>
+            <h2 class="section-title">Infrastructure Layer</h2>
+            <div class="infrastructure-grid">
+                <div class="infra-card">
+                    <div class="infra-icon">🔍</div>
+                    <h4>Perplexity Search</h4>
+                    <p>Web search with domain filtering for academic and general sources.</p>
+                    <ul class="tools-list">
+                        <li>search(query)</li>
+                        <li>search_academic(query)</li>
+                        <li>search_general(query)</li>
+                        <li>batch_search(queries)</li>
+                    </ul>
+                </div>
+
+                <div class="infra-card">
+                    <div class="infra-icon">🗄️</div>
+                    <h4>LanceDB Knowledge Base</h4>
+                    <p>Vector database for semantic storage and retrieval of findings.</p>
+                    <ul class="tools-list">
+                        <li>save_finding(...)</li>
+                        <li>search_knowledge(query)</li>
+                        <li>list_sources()</li>
+                        <li>get_findings_index()</li>
+                    </ul>
+                </div>
+
+                <div class="infra-card">
+                    <div class="infra-icon">🌐</div>
+                    <h4>URL Extraction</h4>
+                    <p>Parallel content extraction from web pages for deep research.</p>
+                    <ul class="tools-list">
+                        <li>extract_for_research(url)</li>
+                        <li>parallel_extract(urls)</li>
+                    </ul>
+                </div>
+
+                <div class="infra-card">
+                    <div class="infra-icon">🤖</div>
+                    <h4>LiteLLM Proxy</h4>
+                    <p>Unified interface to multiple LLM providers.</p>
+                    <ul class="tools-list">
+                        <li>Claude Opus 4.5</li>
+                        <li>Claude Haiku 4.5</li>
+                        <li>GPT-5 Mini</li>
+                    </ul>
+                </div>
+
+                <div class="infra-card">
+                    <div class="infra-icon">💾</div>
+                    <h4>Checkpointing</h4>
+                    <p>Save and resume long-running research sessions.</p>
+                    <ul class="tools-list">
+                        <li>checkpoint_planning_*</li>
+                        <li>checkpoint_iteration_*</li>
+                        <li>checkpoint_complete_*</li>
+                    </ul>
+                </div>
+
+                <div class="infra-card">
+                    <div class="infra-icon">🔁</div>
+                    <h4>Retry Utilities</h4>
+                    <p>Exponential backoff for resilient API calls.</p>
+                    <ul class="tools-list">
+                        <li>@with_retry(max=3)</li>
+                        <li>base_delay=5.0s</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Data Flow SVG -->
+        <section class="dataflow-section">
+            <h2 class="section-title">Data Flow Architecture</h2>
+            <div class="dataflow-diagram">
+                <svg class="dataflow-svg" viewBox="0 0 900 400">
+                    <!-- Background layers -->
+                    <defs>
+                        <linearGradient id="flowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#a855f7;stop-opacity:0.3" />
+                            <stop offset="50%" style="stop-color:#3b82f6;stop-opacity:0.3" />
+                            <stop offset="100%" style="stop-color:#10b981;stop-opacity:0.3" />
+                        </linearGradient>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+
+                    <!-- Flow arrows -->
+                    <path d="M120 200 Q200 200, 200 100 L350 100" stroke="#a855f7" stroke-width="2" fill="none" filter="url(#glow)" stroke-dasharray="5,5">
+                        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1s" repeatCount="indefinite"/>
+                    </path>
+                    <path d="M120 200 Q200 200, 200 200 L350 200" stroke="#3b82f6" stroke-width="2" fill="none" filter="url(#glow)" stroke-dasharray="5,5">
+                        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1s" repeatCount="indefinite"/>
+                    </path>
+                    <path d="M120 200 Q200 200, 200 300 L350 300" stroke="#3b82f6" stroke-width="2" fill="none" filter="url(#glow)" stroke-dasharray="5,5">
+                        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1s" repeatCount="indefinite"/>
+                    </path>
+                    
+                    <path d="M450 100 Q550 100, 550 200 L600 200" stroke="#f59e0b" stroke-width="2" fill="none" filter="url(#glow)" stroke-dasharray="5,5">
+                        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1s" repeatCount="indefinite"/>
+                    </path>
+                    <path d="M450 200 L600 200" stroke="#f59e0b" stroke-width="2" fill="none" filter="url(#glow)" stroke-dasharray="5,5">
+                        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1s" repeatCount="indefinite"/>
+                    </path>
+                    <path d="M450 300 Q550 300, 550 200 L600 200" stroke="#f59e0b" stroke-width="2" fill="none" filter="url(#glow)" stroke-dasharray="5,5">
+                        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1s" repeatCount="indefinite"/>
+                    </path>
+
+                    <path d="M700 200 L780 200" stroke="#10b981" stroke-width="2" fill="none" filter="url(#glow)" stroke-dasharray="5,5">
+                        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1s" repeatCount="indefinite"/>
+                    </path>
+
+                    <!-- Feedback loop -->
+                    <path d="M650 250 Q650 350, 200 350 Q150 350, 150 250" stroke="#ec4899" stroke-width="1.5" fill="none" filter="url(#glow)" stroke-dasharray="5,5" opacity="0.7">
+                        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="2s" repeatCount="indefinite"/>
+                    </path>
+                    <text x="400" y="375" fill="#ec4899" font-size="11" text-anchor="middle">Iterative gap-filling loop</text>
+
+                    <!-- User Query Node -->
+                    <rect x="30" y="170" width="90" height="60" rx="10" fill="#1a1a24" stroke="#00d4ff" stroke-width="2"/>
+                    <text x="75" y="195" fill="#f0f0f5" font-size="12" text-anchor="middle">User</text>
+                    <text x="75" y="215" fill="#9ca3af" font-size="10" text-anchor="middle">Query</text>
+
+                    <!-- Planner Node -->
+                    <rect x="350" y="170" width="100" height="60" rx="10" fill="#1a1a24" stroke="#a855f7" stroke-width="2"/>
+                    <text x="400" y="195" fill="#f0f0f5" font-size="12" text-anchor="middle">🎯 Planner</text>
+                    <text x="400" y="215" fill="#9ca3af" font-size="9" text-anchor="middle">Decompose</text>
+
+                    <!-- Worker Nodes -->
+                    <rect x="350" y="70" width="100" height="50" rx="8" fill="#1a1a24" stroke="#3b82f6" stroke-width="2"/>
+                    <text x="400" y="100" fill="#f0f0f5" font-size="11" text-anchor="middle">⚡ Worker 1</text>
+
+                    <rect x="350" y="270" width="100" height="50" rx="8" fill="#1a1a24" stroke="#3b82f6" stroke-width="2"/>
+                    <text x="400" y="300" fill="#f0f0f5" font-size="11" text-anchor="middle">⚡ Worker N</text>
+
+                    <text x="400" y="250" fill="#6b7280" font-size="16" text-anchor="middle">⋮</text>
+
+                    <!-- Knowledge Base -->
+                    <ellipse cx="500" y="50" rx="45" ry="25" fill="#1a1a24" stroke="#00d4ff" stroke-width="1.5"/>
+                    <text x="500" y="55" fill="#00d4ff" font-size="10" text-anchor="middle">LanceDB</text>
+
+                    <!-- Critic Node -->
+                    <rect x="600" y="170" width="100" height="60" rx="10" fill="#1a1a24" stroke="#f59e0b" stroke-width="2"/>
+                    <text x="650" y="195" fill="#f0f0f5" font-size="12" text-anchor="middle">🔬 Critic</text>
+                    <text x="650" y="215" fill="#9ca3af" font-size="9" text-anchor="middle">Evaluate</text>
+
+                    <!-- Editor Node -->
+                    <rect x="780" y="170" width="100" height="60" rx="10" fill="#1a1a24" stroke="#10b981" stroke-width="2"/>
+                    <text x="830" y="195" fill="#f0f0f5" font-size="12" text-anchor="middle">📝 Editor</text>
+                    <text x="830" y="215" fill="#9ca3af" font-size="9" text-anchor="middle">Synthesize</text>
+
+                    <!-- DB connections -->
+                    <path d="M450 95 L460 60" stroke="#00d4ff" stroke-width="1" fill="none" opacity="0.5" stroke-dasharray="3,3"/>
+                    <path d="M450 200 L475 75" stroke="#00d4ff" stroke-width="1" fill="none" opacity="0.5" stroke-dasharray="3,3"/>
+                    <path d="M830 170 L550 60" stroke="#00d4ff" stroke-width="1" fill="none" opacity="0.5" stroke-dasharray="3,3"/>
+                </svg>
+            </div>
+        </section>
+
+        <footer>
+            <p>Deep Research Swarm • Built with Agno, LiteLLM, Perplexity, and LanceDB</p>
+            <p style="margin-top: 8px; font-size: 0.8rem;">PhD-Level Multi-Agent Research System</p>
+        </footer>
+    </div>
+
+    <script>
+        // Add subtle interactivity
+        document.querySelectorAll('.flow-card, .agent-card, .infra-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transition = 'all 0.3s ease';
+            });
+        });
+
+        // Animate stats on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
+
