@@ -20,6 +20,7 @@ venv/
 # Reports and logs
 reports/
 *.log
+*.md
 
 # Checkpoints and generated data
 checkpoints/
