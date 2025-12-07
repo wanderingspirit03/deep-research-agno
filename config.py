@@ -11,6 +11,71 @@ load_dotenv()
 
 
 # =============================================================================
+# HITL (Human-in-the-Loop) Configuration
+# =============================================================================
+
+@dataclass(frozen=True)
+class HitlChannel:
+    """Static smart-channel definition used for domain-based routing."""
+    domain: str
+    channel_id: Optional[str]
+    description: str = ""
+
+
+def _default_hitl_channels() -> List[HitlChannel]:
+    """Smart defaults for Slack routing - domain-specific channels."""
+    return [
+        HitlChannel(
+            domain="econ",
+            channel_id=os.getenv("HITL_CHANNEL_ECON"),
+            description="Economics, macro/micro, trade, labor, policy, and markets",
+        ),
+        HitlChannel(
+            domain="fin_analytics",
+            channel_id=os.getenv("HITL_CHANNEL_FIN"),
+            description="Financial analytics, modeling, valuations, and risk",
+        ),
+        HitlChannel(
+            domain="forecasting",
+            channel_id=os.getenv("HITL_CHANNEL_FORECAST"),
+            description="Forecasting, time-series, demand planning, and scenario planning",
+        ),
+        HitlChannel(
+            domain="swe",
+            channel_id=os.getenv("HITL_CHANNEL_SWE"),
+            description="Software engineering, systems design, and debugging",
+        ),
+        HitlChannel(
+            domain="general",
+            channel_id=os.getenv("HITL_DEFAULT_CHANNEL"),
+            description="General fallback review channel",
+        ),
+    ]
+
+
+@dataclass
+class HitlConfig:
+    """Human-in-the-Loop (Slack) configuration."""
+    enabled: bool = field(default_factory=lambda: os.getenv("HITL_ENABLED", "false").lower() == "true")
+    slack_token: Optional[str] = field(default_factory=lambda: os.getenv("SLACK_TOKEN"))
+    default_channel: str = field(default_factory=lambda: os.getenv("HITL_DEFAULT_CHANNEL", ""))
+    smart_channels: List[HitlChannel] = field(default_factory=_default_hitl_channels)
+    timeout_seconds: int = 300  # 5 minutes default
+    poll_interval_seconds: float = 2.0
+    confidence_threshold: float = 0.7  # Below this, escalate to HITL
+    force_domains: List[str] = field(default_factory=list)  # Always use HITL for these domains
+    model_id: str = "openai/gpt-5-mini-2025-08-07"  # Model for HITL agent
+    temperature: float = 0.2
+
+
+@dataclass
+class ObservabilityConfig:
+    """LMNR (Laminar) observability configuration."""
+    lmnr_enabled: bool = field(default_factory=lambda: bool(os.getenv("LMNR_PROJECT_API_KEY")))
+    lmnr_project_api_key: Optional[str] = field(default_factory=lambda: os.getenv("LMNR_PROJECT_API_KEY"))
+
+
+# =============================================================================
 # Domain Filters
 # =============================================================================
 
@@ -48,22 +113,23 @@ DENYLIST_DOMAINS = [
 @dataclass
 class ModelConfig:
     """LLM model configuration"""
-    # Available models on isara proxy:
-    # - gpt-5-2025-08-07 (powerful)
-    # - gpt-5-mini-2025-08-07 (fast)
-    # - gpt-5-nano-2025-08-07 (fastest)
-    # - gpt-5-codex (code)
-    # - claude-sonnet-4-5-20250929
-    # - claude-haiku-4-5-20251001 (fast)
-    # - claude-opus-4-1-20250805
-    # - claude-opus-4-5-20251101 (most powerful)
+    # Available models on isara proxy (use openai/ prefix for LiteLLM routing):
+    # - openai/gpt-5-2025-08-07 (powerful)
+    # - openai/gpt-5-mini-2025-08-07 (fast)
+    # - openai/gpt-5-nano-2025-08-07 (fastest)
+    # - openai/gpt-5-codex (code)
+    # - openai/claude-sonnet-4-5-20250929
+    # - openai/claude-haiku-4-5-20251001 (fast)
+    # - openai/claude-opus-4-1-20250805
+    # - openai/claude-opus-4-5-20251101 (most powerful)
     
-    # Strategy: GPT-5 full for quality (planner/editor), Mini for speed (workers)
-    planner: str = "gpt-5-2025-08-07"  # Full GPT-5 for strategic planning
-    worker: str = "gpt-5-mini-2025-08-07"  # Fast for parallel search workers
-    editor: str = "gpt-5-2025-08-07"  # Full GPT-5 for synthesis and writing
-    critic: str = "gpt-5-mini-2025-08-07"  # Fast for quality evaluation
-    embedding: str = "text-embedding-3-small"
+    # Strategy: Claude Opus 4.5 for quality (planner/editor), GPT-5 Mini for speed (workers)
+    # Note: Use openai/ prefix to route through LiteLLM proxy with OpenAI-compatible API
+    planner: str = "openai/claude-opus-4-5-20251101"  # Opus 4.5 for strategic planning
+    worker: str = "openai/gpt-5-mini-2025-08-07"  # Fast GPT-5 Mini for parallel search workers
+    editor: str = "openai/claude-opus-4-5-20251101"  # Opus 4.5 for synthesis and writing
+    critic: str = "openai/gpt-5-mini-2025-08-07"  # Fast GPT-5 Mini for quality evaluation
+    embedding: str = "openai/text-embedding-3-large"
     
     # Temperature settings
     planner_temperature: float = 0.3
@@ -113,10 +179,10 @@ class KnowledgeConfig:
     """LanceDB knowledge base configuration"""
     db_path: str = field(default_factory=lambda: os.getenv("LANCEDB_PATH", "./research_kb"))
     
-    # OpenAI embedding model
-    # "text-embedding-3-large" (3072 dims, best quality)
-    # "text-embedding-3-small" (1536 dims, faster)
-    embedding_model: str = "text-embedding-3-large"
+    # OpenAI embedding model (use openai/ prefix for LiteLLM proxy routing)
+    # "openai/text-embedding-3-large" (3072 dims, best quality)
+    # "openai/text-embedding-3-small" (1536 dims, faster)
+    embedding_model: str = "openai/text-embedding-3-large"
     embedding_dimensions: int = 3072
     
     top_k_default: int = 10
@@ -164,6 +230,8 @@ class Config:
     knowledge: KnowledgeConfig = field(default_factory=KnowledgeConfig)
     swarm: SwarmConfig = field(default_factory=SwarmConfig)
     deep_research: DeepResearchConfig = field(default_factory=DeepResearchConfig)
+    hitl: HitlConfig = field(default_factory=HitlConfig)
+    observability: ObservabilityConfig = field(default_factory=ObservabilityConfig)
     
     # API Keys (loaded from environment)
     perplexity_api_key: Optional[str] = field(
@@ -212,6 +280,29 @@ def validate_config() -> List[str]:
     return issues
 
 
+def validate_hitl_config() -> List[str]:
+    """Validate HITL configuration and return list of issues (optional feature)"""
+    issues = []
+    
+    if config.hitl.enabled:
+        if not config.hitl.slack_token:
+            issues.append("HITL enabled but SLACK_TOKEN not set")
+        if not config.hitl.default_channel:
+            issues.append("HITL enabled but HITL_DEFAULT_CHANNEL not set")
+    
+    return issues
+
+
+def validate_observability_config() -> List[str]:
+    """Validate observability configuration and return list of issues (optional feature)"""
+    issues = []
+    
+    # Observability is auto-enabled if key is present, so no validation needed
+    # Just informational
+    
+    return issues
+
+
 if __name__ == "__main__":
     # Quick config check
     print("=== Deep Research Swarm Configuration ===\n")
@@ -222,13 +313,38 @@ if __name__ == "__main__":
         for issue in issues:
             print(f"   - {issue}")
     else:
-        print("✅ Configuration valid!")
+        print("✅ Core configuration valid!")
+    
+    # Check HITL
+    hitl_issues = validate_hitl_config()
+    if config.hitl.enabled:
+        if hitl_issues:
+            print("\n⚠️  HITL Issues:")
+            for issue in hitl_issues:
+                print(f"   - {issue}")
+        else:
+            print("✅ HITL configuration valid!")
+    else:
+        print("ℹ️  HITL disabled (set HITL_ENABLED=true to enable)")
+    
+    # Check Observability
+    if config.observability.lmnr_enabled:
+        print("✅ LMNR observability enabled")
+    else:
+        print("ℹ️  LMNR observability disabled (set LMNR_PROJECT_API_KEY to enable)")
     
     print(f"\n📊 Settings:")
     print(f"   Planner Model: {config.models.planner}")
     print(f"   Worker Model: {config.models.worker}")
     print(f"   Editor Model: {config.models.editor}")
+    print(f"   Critic Model: {config.models.critic}")
     print(f"   Max Subtasks: {config.swarm.max_subtasks}")
     print(f"   Max Workers: {config.swarm.max_workers}")
     print(f"   Search Max Results: {config.search.max_results}")
+    print(f"\n🔄 HITL Settings:")
+    print(f"   Enabled: {config.hitl.enabled}")
+    print(f"   Confidence Threshold: {config.hitl.confidence_threshold}")
+    print(f"   Timeout: {config.hitl.timeout_seconds}s")
+    print(f"\n📈 Observability:")
+    print(f"   LMNR Enabled: {config.observability.lmnr_enabled}")
 

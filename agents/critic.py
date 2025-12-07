@@ -7,9 +7,15 @@ The Critic Agent:
 3. Recommends follow-up queries to fill gaps
 4. Determines when research is ready for synthesis
 5. Reviews draft reports for improvements
+6. Optionally escalates to human reviewers via HITL
+
+HITL (Human-in-the-Loop) Integration:
+- When enabled, low-confidence evaluations can be escalated to human reviewers
+- Supports configurable confidence thresholds
+- Merges human feedback with LLM evaluation
 """
 import os
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, TYPE_CHECKING
 from textwrap import dedent
 
 import litellm
@@ -19,12 +25,17 @@ from agno.agent import Agent
 from agno.models.litellm import LiteLLM
 from agno.utils.log import logger
 
+from config import config
+from infrastructure.observability import observe
 from .schemas import (
     CriticEvaluation,
     DraftCritique,
     GapAnalysis,
     QualityFinding,
 )
+
+if TYPE_CHECKING:
+    from .hitl_agent import HitlAgent, HitlResult
 
 
 # =============================================================================
@@ -37,6 +48,9 @@ class CriticAgent:
     
     Acts as a rigorous academic reviewer to ensure research quality
     meets PhD-level standards before synthesis.
+    
+    Supports optional HITL (Human-in-the-Loop) escalation for low-confidence
+    evaluations or forced human review.
     """
     
     def __init__(
@@ -46,6 +60,9 @@ class CriticAgent:
         api_key: Optional[str] = None,
         temperature: float = 0.2,  # Low for consistent evaluation
         quality_threshold: int = 80,
+        hitl_enabled: bool = False,
+        hitl_agent: Optional["HitlAgent"] = None,
+        hitl_confidence_threshold: float = 0.7,
     ):
         """
         Initialize Critic Agent.
@@ -56,6 +73,9 @@ class CriticAgent:
             api_key: LiteLLM API key
             temperature: Model temperature (lower = more consistent)
             quality_threshold: Minimum score (0-100) to pass evaluation
+            hitl_enabled: Whether HITL escalation is enabled
+            hitl_agent: Pre-initialized HITL agent (lazy-created if None)
+            hitl_confidence_threshold: Score range that triggers HITL (e.g., 60-80)
         """
         self.model_id = model_id
         self.api_base = api_base or os.getenv("LITELLM_API_BASE")
@@ -63,9 +83,27 @@ class CriticAgent:
         self.temperature = temperature
         self.quality_threshold = quality_threshold
         
+        # HITL integration
+        self.hitl_enabled = hitl_enabled
+        self._hitl_agent = hitl_agent
+        self.hitl_confidence_threshold = hitl_confidence_threshold
+        
         # Lazy-initialized agents
         self._evaluation_agent: Optional[Agent] = None
         self._critique_agent: Optional[Agent] = None
+    
+    @property
+    def hitl_agent(self) -> Optional["HitlAgent"]:
+        """Lazy initialization of HITL agent."""
+        if self._hitl_agent is None and self.hitl_enabled:
+            try:
+                from .hitl_agent import HitlAgent
+                self._hitl_agent = HitlAgent()
+                logger.info("[Critic] HITL agent initialized")
+            except Exception as e:
+                logger.warning(f"[Critic] Could not initialize HITL agent: {e}")
+                self.hitl_enabled = False
+        return self._hitl_agent
     
     @property
     def evaluation_agent(self) -> Agent:
@@ -233,11 +271,13 @@ class CriticAgent:
             """).strip(),
         ]
     
+    @observe(name="critic.evaluate")
     def evaluate(
         self,
         findings: List[Dict[str, Any]],
         original_query: str,
         iteration: int = 1,
+        force_hitl: bool = False,
     ) -> CriticEvaluation:
         """
         Evaluate research findings for quality and completeness.
@@ -246,12 +286,47 @@ class CriticAgent:
             findings: List of research findings (dicts with content, source, etc.)
             original_query: The original research query
             iteration: Current research iteration number
+            force_hitl: Force human review regardless of score
             
         Returns:
             CriticEvaluation: Detailed evaluation with scores and gaps
         """
         logger.info(f"Evaluating {len(findings)} findings for: {original_query[:50]}...")
         
+        # Step 1: Run LLM evaluation first
+        evaluation = self._llm_evaluate(findings, original_query, iteration)
+        
+        # Step 2: Decide if HITL is needed
+        needs_hitl = (
+            force_hitl or
+            (self.hitl_enabled and self._should_escalate(evaluation, original_query))
+        )
+        
+        # Step 3: If HITL needed, get human feedback
+        if needs_hitl and self.hitl_agent:
+            logger.info("[Critic] Escalating to HITL for human review")
+            try:
+                hitl_result = self._run_hitl(evaluation, findings, original_query)
+                if hitl_result:
+                    evaluation = self._merge_hitl_feedback(evaluation, hitl_result)
+                    logger.info(f"[Critic] HITL feedback merged, new score: {evaluation.overall_score}")
+            except Exception as e:
+                logger.warning(f"[Critic] HITL escalation failed: {e}")
+        
+        logger.info(
+            f"Evaluation complete: score={evaluation.overall_score}, "
+            f"ready={evaluation.ready_for_synthesis}, gaps={len(evaluation.critical_gaps)}"
+        )
+        
+        return evaluation
+    
+    def _llm_evaluate(
+        self,
+        findings: List[Dict[str, Any]],
+        original_query: str,
+        iteration: int,
+    ) -> CriticEvaluation:
+        """Run LLM-based evaluation (internal method)."""
         # Format findings for evaluation
         findings_text = self._format_findings(findings)
         
@@ -289,13 +364,118 @@ Provide a comprehensive evaluation including:
             logger.warning("Could not parse critic evaluation, using fallback")
             evaluation = self._create_fallback_evaluation(findings)
         
-        logger.info(
-            f"Evaluation complete: score={evaluation.overall_score}, "
-            f"ready={evaluation.ready_for_synthesis}, gaps={len(evaluation.critical_gaps)}"
-        )
-        
         return evaluation
     
+    def _should_escalate(self, evaluation: CriticEvaluation, query: str) -> bool:
+        """
+        Determine if evaluation should be escalated to HITL.
+        
+        Escalation criteria:
+        - Score is in "uncertain" range (not too low to be obvious failure,
+          not high enough to pass)
+        - Query is in a forced HITL domain
+        """
+        # Check if query is in a forced domain
+        force_domains = config.hitl.force_domains if hasattr(config, 'hitl') else []
+        query_lower = query.lower()
+        for domain in force_domains:
+            if domain.lower() in query_lower:
+                logger.info(f"[Critic] Force HITL for domain: {domain}")
+                return True
+        
+        # Check if score is in uncertain range
+        min_uncertain = 60  # Below this, clearly needs more research
+        max_uncertain = self.quality_threshold  # At or above this, passes
+        
+        if min_uncertain <= evaluation.overall_score < max_uncertain:
+            logger.info(
+                f"[Critic] Score {evaluation.overall_score} in uncertain range "
+                f"({min_uncertain}-{max_uncertain}), escalating to HITL"
+            )
+            return True
+        
+        return False
+    
+    def _run_hitl(
+        self,
+        evaluation: CriticEvaluation,
+        findings: List[Dict[str, Any]],
+        query: str,
+    ) -> Optional["HitlResult"]:
+        """Run HITL review and return result."""
+        if not self.hitl_agent:
+            return None
+        
+        # Build evaluation summary for human review
+        summary = f"""
+## AI Evaluation Summary
+
+**Overall Score:** {evaluation.overall_score}/100
+**Coverage:** {evaluation.coverage_score}/100
+**Source Quality:** {evaluation.source_quality_score}/100
+**Evidence Strength:** {evaluation.evidence_strength_score}/100
+
+### Strengths
+{chr(10).join('- ' + s for s in (evaluation.strengths or [])[:5])}
+
+### Weaknesses
+{chr(10).join('- ' + w for w in (evaluation.weaknesses or [])[:5])}
+
+### Recommendation
+{evaluation.recommendation}
+
+**Ready for synthesis:** {evaluation.ready_for_synthesis}
+"""
+        
+        # Format some findings for context
+        findings_summary = self._format_findings(findings[:10])
+        
+        question = f"Research quality evaluation for: {query}"
+        response = f"{summary}\n\n## Sample Findings\n{findings_summary}"
+        
+        return self.hitl_agent.run_review(
+            question=question,
+            response=response,
+            mode_hint="qualitative_review",
+            meta={"query": query, "findings_count": len(findings)},
+        )
+    
+    def _merge_hitl_feedback(
+        self,
+        evaluation: CriticEvaluation,
+        hitl_result: "HitlResult",
+    ) -> CriticEvaluation:
+        """Merge HITL feedback into evaluation."""
+        # Adjust score based on HITL result
+        hitl_score = hitl_result.score * 10  # HITL returns 0-10, convert to 0-100
+        
+        # Weighted average: 60% LLM, 40% human
+        new_score = int(0.6 * evaluation.overall_score + 0.4 * hitl_score)
+        
+        # Add HITL feedback to weaknesses if not approved
+        new_weaknesses = list(evaluation.weaknesses or [])
+        if not hitl_result.approved and hitl_result.feedback:
+            new_weaknesses.append(f"[HITL] {hitl_result.feedback[:200]}")
+        
+        # Update ready_for_synthesis based on combined assessment
+        new_ready = hitl_result.approved and new_score >= self.quality_threshold
+        
+        # Create updated evaluation
+        return CriticEvaluation(
+            overall_score=new_score,
+            coverage_score=evaluation.coverage_score,
+            source_quality_score=evaluation.source_quality_score,
+            evidence_strength_score=evaluation.evidence_strength_score,
+            balance_score=evaluation.balance_score,
+            strengths=evaluation.strengths,
+            weaknesses=new_weaknesses,
+            critical_gaps=evaluation.critical_gaps,
+            follow_up_queries=evaluation.follow_up_queries,
+            ready_for_synthesis=new_ready,
+            recommendation=evaluation.recommendation if new_ready else "continue",
+        )
+    
+    @observe(name="critic.review_draft")
     def review_draft(self, draft: str, original_query: str) -> DraftCritique:
         """
         Review a draft report for improvements.

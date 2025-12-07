@@ -7,6 +7,7 @@ Provides custom Agno Toolkits for:
 - Docker Sandbox (local code execution for development)
 - LanceDB (vector storage for research findings)
 - Retry utilities (exponential backoff for reliability)
+- Observability (LMNR/Laminar tracing)
 """
 from .perplexity_tools import PerplexitySearchTools
 from .daytona_tools import DaytonaSandboxTools
@@ -19,6 +20,11 @@ from .retry_utils import (
     RetryContext,
     calculate_backoff_delay,
     is_retriable_error,
+)
+from .observability import (
+    init_observability,
+    observe,
+    get_observability_status,
 )
 
 __all__ = [
@@ -33,5 +39,9 @@ __all__ = [
     "RetryContext",
     "calculate_backoff_delay",
     "is_retriable_error",
+    # Observability
+    "init_observability",
+    "observe",
+    "get_observability_status",
 ]
 

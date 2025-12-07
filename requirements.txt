@@ -20,3 +20,10 @@ anthropic>=0.75.0
 python-dotenv>=1.2.1
 httpx>=0.28.1
 pydantic>=2.12.5
+
+# HITL (Human-in-the-Loop) - Slack integration
+slack-sdk>=3.39.0
+
+# Observability (LMNR/Laminar)
+lmnr>=0.7.24
+opentelemetry-instrumentation-agno>=0.1.0

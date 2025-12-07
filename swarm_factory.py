@@ -51,9 +51,9 @@ PRESETS: Dict[str, SwarmPreset] = {
         description="Fast research with minimal depth - good for simple queries",
         max_workers=3,
         max_subtasks=3,
-        planner_model="claude-haiku-4-5-20251001",  # Fast for simple planning
-        worker_model="claude-haiku-4-5-20251001",
-        editor_model="claude-haiku-4-5-20251001",
+        planner_model="openai/gpt-5-mini-2025-08-07",  # Fast for simple planning
+        worker_model="openai/gpt-5-mini-2025-08-07",
+        editor_model="openai/gpt-5-mini-2025-08-07",
         search_max_results=5,
     ),
     "balanced": SwarmPreset(
@@ -61,9 +61,9 @@ PRESETS: Dict[str, SwarmPreset] = {
         description="Balance between speed and depth - good for most queries",
         max_workers=5,
         max_subtasks=5,
-        planner_model="claude-opus-4-5-20251101",  # Smart planning
-        worker_model="claude-haiku-4-5-20251001",  # Fast workers
-        editor_model="claude-opus-4-5-20251101",  # Quality synthesis
+        planner_model="openai/claude-opus-4-5-20251101",  # Smart planning
+        worker_model="openai/gpt-5-mini-2025-08-07",  # Fast workers
+        editor_model="openai/claude-opus-4-5-20251101",  # Quality synthesis
         search_max_results=10,
     ),
     "deep": SwarmPreset(
@@ -71,9 +71,9 @@ PRESETS: Dict[str, SwarmPreset] = {
         description="Thorough research with maximum depth - for complex topics",
         max_workers=7,
         max_subtasks=10,
-        planner_model="claude-opus-4-5-20251101",
-        worker_model="claude-haiku-4-5-20251001",
-        editor_model="claude-opus-4-5-20251101",
+        planner_model="openai/claude-opus-4-5-20251101",
+        worker_model="openai/gpt-5-mini-2025-08-07",
+        editor_model="openai/claude-opus-4-5-20251101",
         search_max_results=15,
     ),
     "academic": SwarmPreset(
@@ -81,9 +81,9 @@ PRESETS: Dict[str, SwarmPreset] = {
         description="Focused on scholarly sources - for research papers",
         max_workers=5,
         max_subtasks=7,
-        planner_model="claude-opus-4-5-20251101",
-        worker_model="claude-haiku-4-5-20251001",
-        editor_model="claude-opus-4-5-20251101",
+        planner_model="openai/claude-opus-4-5-20251101",
+        worker_model="openai/gpt-5-mini-2025-08-07",
+        editor_model="openai/claude-opus-4-5-20251101",
         search_max_results=10,
         academic_focus=True,
     ),
@@ -92,9 +92,9 @@ PRESETS: Dict[str, SwarmPreset] = {
         description="Code and documentation focus - for technical queries",
         max_workers=5,
         max_subtasks=5,
-        planner_model="claude-opus-4-5-20251101",
-        worker_model="claude-haiku-4-5-20251001",
-        editor_model="claude-opus-4-5-20251101",
+        planner_model="openai/claude-opus-4-5-20251101",
+        worker_model="openai/gpt-5-mini-2025-08-07",
+        editor_model="openai/claude-opus-4-5-20251101",
         search_max_results=10,
     ),
     "deep_research": SwarmPreset(
@@ -102,9 +102,9 @@ PRESETS: Dict[str, SwarmPreset] = {
         description="Multi-iteration research with quality control - for comprehensive analysis (20-30 min)",
         max_workers=7,
         max_subtasks=15,
-        planner_model="claude-opus-4-5-20251101",  # Best reasoning for PhD-level
-        worker_model="claude-haiku-4-5-20251001",  # Fast parallel workers
-        editor_model="claude-opus-4-5-20251101",  # Best synthesis
+        planner_model="openai/claude-opus-4-5-20251101",  # Best reasoning for PhD-level
+        worker_model="openai/gpt-5-mini-2025-08-07",  # Fast parallel workers
+        editor_model="openai/claude-opus-4-5-20251101",  # Best synthesis
         search_max_results=15,
         academic_focus=True,
         max_iterations=3,
@@ -116,9 +116,9 @@ PRESETS: Dict[str, SwarmPreset] = {
         description="Quick deep research with 1 iteration - for faster comprehensive results (5-10 min)",
         max_workers=5,
         max_subtasks=7,  # Reduced from 10 for faster execution
-        planner_model="claude-opus-4-5-20251101",  # Best planning even in express
-        worker_model="claude-haiku-4-5-20251001",  # Fast workers
-        editor_model="claude-opus-4-5-20251101",  # Quality synthesis
+        planner_model="openai/claude-opus-4-5-20251101",  # Best planning even in express
+        worker_model="openai/gpt-5-mini-2025-08-07",  # Fast workers
+        editor_model="openai/claude-opus-4-5-20251101",  # Quality synthesis
         search_max_results=10,
         academic_focus=True,
         max_iterations=1,

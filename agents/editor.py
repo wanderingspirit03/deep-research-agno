@@ -20,6 +20,7 @@ from agno.models.litellm import LiteLLM
 from agno.utils.log import logger
 
 from infrastructure.knowledge_tools import KnowledgeTools
+from infrastructure.observability import observe
 
 
 # =============================================================================
@@ -376,6 +377,7 @@ Write the section now (include the ## heading):"""
             logger.error(f"Section writing failed: {e}")
             return f"## {section['title']}\n\n[Section generation failed: {str(e)[:100]}]\n"
     
+    @observe(name="editor.synthesize")
     def synthesize(self, original_query: str, findings_index: Optional[str] = None) -> str:
         """
         Two-pass synthesis for high-quality reports within context limits.

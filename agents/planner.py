@@ -21,6 +21,7 @@ from agno.models.litellm import LiteLLM
 from agno.utils.log import logger
 
 from infrastructure.retry_utils import with_retry
+from infrastructure.observability import observe
 
 
 # =============================================================================
@@ -187,6 +188,7 @@ class PlannerAgent:
             """).strip(),
         ]
     
+    @observe(name="planner.plan")
     @with_retry(max_retries=3, base_delay=5.0)
     def plan(self, query: str) -> ResearchPlan:
         """
@@ -210,6 +212,11 @@ For each subtask, specify whether to use 'academic' or 'general' search.
         """.strip()
         
         response = self.agent.run(prompt)
+        
+        # Handle None response (LLM call failed)
+        if response is None:
+            logger.error(f"LLM returned None response for model: {self.model_id}")
+            raise RuntimeError(f"LLM call failed - model '{self.model_id}' returned no response. Check if model is available on proxy.")
         
         # The response.content should be the ResearchPlan object
         if isinstance(response.content, ResearchPlan):

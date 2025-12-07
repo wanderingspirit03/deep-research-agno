@@ -5,6 +5,8 @@ Provides explicit storage control for research findings:
 - Save findings with source attribution
 - Semantic search over stored findings
 - Source management and retrieval
+
+Uses LiteLLM for embeddings, allowing routing through proxy servers.
 """
 import os
 import uuid
@@ -22,11 +24,11 @@ except ImportError:
     logger.warning("lancedb package not installed. Run: pip install lancedb")
 
 try:
-    from openai import OpenAI
-    OPENAI_AVAILABLE = True
+    import litellm
+    LITELLM_AVAILABLE = True
 except ImportError:
-    OPENAI_AVAILABLE = False
-    logger.warning("openai package not installed. Run: pip install openai")
+    LITELLM_AVAILABLE = False
+    logger.warning("litellm package not installed. Run: pip install litellm")
 
 
 # =============================================================================
@@ -108,7 +110,7 @@ class KnowledgeTools(Toolkit):
     - Explicit save_finding() for controlled storage
     - Semantic search over stored findings
     - Source URL tracking and retrieval
-    - OpenAI embeddings (text-embedding-3-large)
+    - LiteLLM embeddings (routes through proxy)
     """
     
     def __init__(
@@ -116,7 +118,8 @@ class KnowledgeTools(Toolkit):
         db_path: Optional[str] = None,
         embedding_model: str = "text-embedding-3-large",
         embedding_dimensions: int = 3072,
-        openai_api_key: Optional[str] = None,
+        api_base: Optional[str] = None,
+        api_key: Optional[str] = None,
         top_k_default: int = 10,
     ):
         """
@@ -124,11 +127,12 @@ class KnowledgeTools(Toolkit):
         
         Args:
             db_path: Path to LanceDB database directory
-            embedding_model: OpenAI embedding model
+            embedding_model: Embedding model name
                 - "text-embedding-3-large" (3072 dims, best quality)
                 - "text-embedding-3-small" (1536 dims, faster)
             embedding_dimensions: Embedding vector dimensions (3072 for large, 1536 for small)
-            openai_api_key: OpenAI API key for embeddings
+            api_base: LiteLLM API base URL (for proxy)
+            api_key: LiteLLM API key
             top_k_default: Default number of results for search
         """
         self.db_path = db_path or os.getenv("LANCEDB_PATH", "./research_kb")
@@ -136,13 +140,13 @@ class KnowledgeTools(Toolkit):
         self.embedding_dimensions = embedding_dimensions
         self.top_k_default = top_k_default
         
-        # OpenAI API key
-        self.openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
+        # LiteLLM API configuration (supports proxy)
+        self.api_base = api_base or os.getenv("LITELLM_API_BASE")
+        self.api_key = api_key or os.getenv("LITELLM_API_KEY") or os.getenv("OPENAI_API_KEY")
         
         # Lazy-initialized clients
         self._db: Optional[lancedb.DBConnection] = None
         self._table = None
-        self._openai_client = None
         
         # Register tools with Toolkit
         tools = [
@@ -155,17 +159,6 @@ class KnowledgeTools(Toolkit):
         ]
         
         super().__init__(name="knowledge_tools", tools=tools)
-    
-    @property
-    def openai_client(self):
-        """Lazy initialization of OpenAI client"""
-        if self._openai_client is None:
-            if not OPENAI_AVAILABLE:
-                raise ImportError("openai package not installed. Run: pip install openai")
-            if not self.openai_api_key:
-                raise ValueError("OPENAI_API_KEY not set")
-            self._openai_client = OpenAI(api_key=self.openai_api_key)
-        return self._openai_client
     
     @property
     def db(self):
@@ -212,19 +205,31 @@ class KnowledgeTools(Toolkit):
         return self._table
     
     def _get_embedding(self, text: str) -> List[float]:
-        """Generate embedding for text using OpenAI"""
-        if not OPENAI_AVAILABLE:
-            logger.error("OpenAI not available")
+        """Generate embedding for text using LiteLLM (supports proxy routing)"""
+        if not LITELLM_AVAILABLE:
+            logger.error("LiteLLM not available")
+            return [0.0] * self.embedding_dimensions
+        
+        if not self.api_key:
+            logger.error("No API key for embeddings (LITELLM_API_KEY or OPENAI_API_KEY)")
             return [0.0] * self.embedding_dimensions
         
         try:
-            response = self.openai_client.embeddings.create(
-                model=self.embedding_model,
-                input=text,
-            )
-            return response.data[0].embedding
+            # Build kwargs for litellm.embedding
+            kwargs = {
+                "model": self.embedding_model,
+                "input": [text],
+            }
+            
+            # Add API base if using proxy
+            if self.api_base:
+                kwargs["api_base"] = self.api_base
+                kwargs["api_key"] = self.api_key
+            
+            response = litellm.embedding(**kwargs)
+            return response.data[0]["embedding"]
         except Exception as e:
-            logger.error(f"OpenAI embedding failed: {e}")
+            logger.error(f"LiteLLM embedding failed: {e}")
             return [0.0] * self.embedding_dimensions
     
     # =========================================================================
@@ -652,19 +657,25 @@ if __name__ == "__main__":
     
     print("=== Knowledge Tools Test ===\n")
     
-    # Check API key
-    openai_key = os.getenv("OPENAI_API_KEY")
+    # Check API configuration
+    litellm_base = os.getenv("LITELLM_API_BASE")
     litellm_key = os.getenv("LITELLM_API_KEY")
+    openai_key = os.getenv("OPENAI_API_KEY")
     
-    if not openai_key and not litellm_key:
+    if litellm_base and litellm_key:
+        print(f"✅ Using LiteLLM proxy: {litellm_base}")
+    elif openai_key:
+        print(f"✅ Using direct OpenAI API")
+    else:
         print("❌ No embedding API key found")
-        print("   Set OPENAI_API_KEY or LITELLM_API_KEY + LITELLM_API_BASE")
+        print("   Set LITELLM_API_KEY + LITELLM_API_BASE (recommended)")
+        print("   Or set OPENAI_API_KEY for direct OpenAI")
         exit(1)
-    
-    print(f"✅ API key found")
     
     # Initialize tools with test path
     tools = KnowledgeTools(db_path="./test_research_kb")
+    print(f"✅ Embedding model: {tools.embedding_model}")
+    print(f"✅ Dimensions: {tools.embedding_dimensions}")
     
     # Test save_finding
     print("\n--- Save Finding Test ---")

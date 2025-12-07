@@ -21,6 +21,7 @@ from agno.utils.log import logger
 from infrastructure.perplexity_tools import PerplexitySearchTools
 from infrastructure.knowledge_tools import KnowledgeTools
 from infrastructure.retry_utils import with_retry
+from infrastructure.observability import observe
 try:
     from infrastructure.parallel_tools import ParallelExtractTools
     PARALLEL_AVAILABLE = True
@@ -295,6 +296,7 @@ class WorkerAgent:
         self._worker_counter += 1
         return f"W{self._worker_counter:02d}"
     
+    @observe(name="worker.execute_subtask")
     @with_retry(max_retries=3, base_delay=3.0)
     def execute_subtask(self, subtask: Subtask, worker_id: Optional[str] = None) -> str:
         """
@@ -341,6 +343,7 @@ Search for information, evaluate results, and save all valuable findings to the 
         
         return response.content
     
+    @observe(name="worker.execute_subtasks")
     def execute_subtasks(self, subtasks: List[Subtask]) -> List[dict]:
         """
         Execute multiple subtasks sequentially.

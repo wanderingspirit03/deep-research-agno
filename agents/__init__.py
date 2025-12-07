@@ -7,6 +7,7 @@ Provides specialized agents for the research swarm:
 - Editor Agent: Synthesizes findings into final report
 - Critic Agent: Evaluates research quality and identifies gaps
 - Domain Expert Agents: Multi-perspective analysis
+- HITL Agent: Human-in-the-loop review via Slack
 """
 from .planner import PlannerAgent, ResearchPlan, Subtask
 from .worker import WorkerAgent, create_worker_agent
@@ -43,6 +44,16 @@ from .schemas import (
     ResearchCheckpoint,
 )
 
+# HITL Agent (optional - requires Slack)
+try:
+    from .hitl_agent import HitlAgent, HitlResult, Domain as HitlDomain
+    _HITL_AVAILABLE = True
+except ImportError:
+    HitlAgent = None
+    HitlResult = None
+    HitlDomain = None
+    _HITL_AVAILABLE = False
+
 __all__ = [
     # Core agents
     "PlannerAgent",
@@ -59,6 +70,10 @@ __all__ = [
     "get_multi_perspective_analysis",
     "list_expert_types",
     "EXPERT_CONFIGS",
+    # HITL Agent
+    "HitlAgent",
+    "HitlResult",
+    "HitlDomain",
     # Schemas
     "ResearchPhase",
     "SearchType",

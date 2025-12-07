@@ -4,14 +4,34 @@ Deep Research Swarm - Main Orchestration Module
 Implements the main orchestration loop using Agno Workflows:
 1. Planner → Creates research plan with subtasks
 2. Workers → Execute subtasks in parallel (Perplexity search + save findings)
-3. Editor → Synthesize findings into comprehensive report
+3. Critic → Evaluate quality and identify gaps (with optional HITL)
+4. Editor → Synthesize findings into comprehensive report
 
 Uses Agno Workflow 2.0 with Parallel execution for optimal performance.
+
+Features:
+- Multi-iteration research with gap filling
+- Quality evaluation by Critic agent
+- Optional HITL (Human-in-the-Loop) for human review
+- LMNR observability for tracing
 """
+# Suppress macOS Python Dock icon popup (must be before other imports)
+import sys
+if sys.platform == "darwin":
+    import os as _os
+    _os.environ.setdefault("PYTHON_DISABLE_DOCK_ICON", "1")
+    # Hide from Dock using AppKit if available
+    try:
+        import AppKit
+        info = AppKit.NSBundle.mainBundle().infoDictionary()
+        info["LSBackgroundOnly"] = "1"
+    except ImportError:
+        pass
+
 import os
 import asyncio
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, TYPE_CHECKING
 from dataclasses import dataclass, field
 from textwrap import dedent
 
@@ -34,6 +54,10 @@ from agents.schemas import CriticEvaluation, ResearchIteration, ResearchCheckpoi
 from infrastructure.perplexity_tools import PerplexitySearchTools
 from infrastructure.knowledge_tools import KnowledgeTools
 from infrastructure.retry_utils import with_retry
+from infrastructure.observability import init_observability, observe
+
+if TYPE_CHECKING:
+    from agents.hitl_agent import HitlAgent
 
 
 # =============================================================================
@@ -685,11 +709,16 @@ class DeepResearchSwarm:
     Implements PhD-level research methodology:
     1. Planning with comprehensive subtask decomposition
     2. Iterative research with gap filling
-    3. Quality evaluation by Critic agent
+    3. Quality evaluation by Critic agent (with optional HITL)
     4. Multi-perspective analysis by Domain Experts
     5. Academic-quality report synthesis
     
     Supports checkpointing for long-running research sessions.
+    
+    HITL (Human-in-the-Loop) Integration:
+    - Enable with hitl_enabled=True
+    - Automatically escalates uncertain evaluations to human reviewers
+    - Force human review with force_hitl=True
     """
     
     def __init__(
@@ -700,6 +729,8 @@ class DeepResearchSwarm:
         quality_threshold: int = 80,
         checkpoint_dir: str = "./checkpoints",
         db_path: Optional[str] = None,
+        hitl_enabled: bool = False,
+        force_hitl: bool = False,
     ):
         """
         Initialize Deep Research Swarm.
@@ -711,12 +742,19 @@ class DeepResearchSwarm:
             quality_threshold: Minimum quality score (0-100) to stop iterating
             checkpoint_dir: Directory for saving checkpoints
             db_path: Path to LanceDB knowledge base
+            hitl_enabled: Enable HITL escalation for uncertain evaluations
+            force_hitl: Force HITL for all evaluations
         """
         self.max_workers = max_workers
         self.max_subtasks = max_subtasks
         self.max_iterations = max_iterations
         self.quality_threshold = quality_threshold
         self.checkpoint_dir = checkpoint_dir
+        
+        # HITL integration
+        self.hitl_enabled = hitl_enabled or config.hitl.enabled
+        self.force_hitl = force_hitl
+        self._hitl_agent: Optional["HitlAgent"] = None
         
         # Shared tools
         self.search_tools = PerplexitySearchTools(max_results=15)  # More results for deep research
@@ -731,6 +769,19 @@ class DeepResearchSwarm:
         # Session tracking
         self.iterations: List[Dict[str, Any]] = []
         self.all_findings: List[Dict[str, Any]] = []
+    
+    @property
+    def hitl_agent(self) -> Optional["HitlAgent"]:
+        """Lazy initialization of HITL agent."""
+        if self._hitl_agent is None and self.hitl_enabled:
+            try:
+                from agents.hitl_agent import HitlAgent
+                self._hitl_agent = HitlAgent()
+                logger.info("[Swarm] HITL agent initialized")
+            except Exception as e:
+                logger.warning(f"[Swarm] Could not initialize HITL agent: {e}")
+                self.hitl_enabled = False
+        return self._hitl_agent
     
     @property
     def planner(self) -> PlannerAgent:
@@ -768,15 +819,18 @@ class DeepResearchSwarm:
     
     @property
     def critic(self) -> CriticAgent:
-        """Lazy init critic"""
+        """Lazy init critic with HITL support"""
         if self._critic is None:
             self._critic = CriticAgent(
                 model_id=config.models.critic,
                 temperature=config.models.critic_temperature,
                 quality_threshold=self.quality_threshold,
+                hitl_enabled=self.hitl_enabled,
+                hitl_agent=self.hitl_agent,
             )
         return self._critic
     
+    @observe(name="swarm.deep_research")
     def deep_research(
         self,
         query: str,
@@ -839,7 +893,9 @@ class DeepResearchSwarm:
                 logger.info("\n--- Critic Evaluation ---")
                 
                 try:
-                    evaluation = self.critic.evaluate(findings, query, iteration)
+                    evaluation = self.critic.evaluate(
+                        findings, query, iteration, force_hitl=self.force_hitl
+                    )
                 except Exception as e:
                     logger.warning(f"Full critic evaluation failed: {e}, using quick assess")
                     quick = self.critic.quick_assess(findings)
@@ -1772,6 +1828,9 @@ def main():
     
     load_dotenv()
     
+    # Initialize observability (if configured)
+    init_observability()
+    
     parser = argparse.ArgumentParser(
         description="Deep Research Swarm - AI-powered research assistant"
     )
@@ -1822,8 +1881,22 @@ def main():
         action="store_true",
         help="Express deep mode (1 iteration, faster); implies --deep"
     )
+    parser.add_argument(
+        "--hitl",
+        action="store_true",
+        help="Enable Slack HITL (Human-in-the-Loop) for quality review"
+    )
+    parser.add_argument(
+        "--force-hitl",
+        action="store_true",
+        help="Force HITL for all evaluations (implies --hitl)"
+    )
     
     args = parser.parse_args()
+    
+    # Handle HITL flags
+    hitl_enabled = args.hitl or args.force_hitl
+    force_hitl = args.force_hitl
     
     if args.mock:
         print("\n" + "=" * 60)
@@ -1911,7 +1984,11 @@ def main():
             max_subtasks=args.max_subtasks,
             max_iterations=1 if args.express else 3,
             quality_threshold=80,
+            hitl_enabled=hitl_enabled,
+            force_hitl=force_hitl,
         )
+        if hitl_enabled:
+            logger.info("[CLI] HITL enabled for quality review")
     else:
         swarm = ResearchSwarm(
             max_workers=args.max_workers,
