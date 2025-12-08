@@ -123,12 +123,12 @@ class ModelConfig:
     # - openai/claude-opus-4-1-20250805
     # - openai/claude-opus-4-5-20251101 (most powerful)
     
-    # Strategy: Claude Opus 4.5 for quality (planner/editor), GPT-5 Mini for speed (workers)
+    # Strategy: Claude Opus 4.5 for all agents (highest quality)
     # Note: Use openai/ prefix to route through LiteLLM proxy with OpenAI-compatible API
     planner: str = "openai/claude-opus-4-5-20251101"  # Opus 4.5 for strategic planning
-    worker: str = "openai/gpt-5-mini-2025-08-07"  # Fast GPT-5 Mini for parallel search workers
+    worker: str = "openai/claude-opus-4-5-20251101"  # Opus 4.5 for research workers
     editor: str = "openai/claude-opus-4-5-20251101"  # Opus 4.5 for synthesis and writing
-    critic: str = "openai/gpt-5-mini-2025-08-07"  # Fast GPT-5 Mini for quality evaluation
+    critic: str = "openai/claude-opus-4-5-20251101"  # Opus 4.5 for quality evaluation
     embedding: str = "openai/text-embedding-3-large"
     
     # Temperature settings

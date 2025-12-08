@@ -166,8 +166,6 @@ class CriticAgent:
                 You are a rigorous academic research critic with PhD-level expertise.
                 Your job is to evaluate research quality and identify gaps that need filling.
                 
-                **Current Date: December 2025** - Use this for temporal context in evaluation.
-                
                 ## Evaluation Criteria
                 
                 ### 1. Coverage Analysis (0-100)

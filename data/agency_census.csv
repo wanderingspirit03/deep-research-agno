@@ -1,0 +1,21 @@
+agency_name,state,agency_type,officer_count,population_served
+New York City Police Department,NY,Municipal Police,36000,8300000
+Los Angeles Police Department,CA,Municipal Police,9000,3900000
+Chicago Police Department,IL,Municipal Police,12000,2700000
+Houston Police Department,TX,Municipal Police,5300,2300000
+Philadelphia Police Department,PA,Municipal Police,6300,1600000
+Phoenix Police Department,AZ,Municipal Police,3000,1700000
+San Antonio Police Department,TX,Municipal Police,2500,1500000
+San Diego Police Department,CA,Municipal Police,1800,1400000
+Dallas Police Department,TX,Municipal Police,3500,1300000
+San Jose Police Department,CA,Municipal Police,1100,1000000
+Austin Police Department,TX,Municipal Police,1900,1000000
+Fort Worth Police Department,TX,Municipal Police,1700,950000
+Columbus Police Department,OH,Municipal Police,1900,900000
+Indianapolis Police Department,IN,Municipal Police,1700,880000
+Charlotte-Mecklenburg Police Department,NC,Municipal Police,2100,880000
+Seattle Police Department,WA,Municipal Police,1400,750000
+Denver Police Department,CO,Municipal Police,1500,720000
+Washington Metropolitan Police,DC,Municipal Police,3800,700000
+Boston Police Department,MA,Municipal Police,2100,700000
+Las Vegas Metropolitan Police,NV,Sheriff's Office,3000,650000

@@ -44,16 +44,16 @@ class SwarmPreset:
 
 
 # Predefined presets
-# Strategy: Claude Opus 4.5 for reasoning, GPT-5 Mini for bulk parallel work
+# Strategy: Claude Opus 4.5 for all agents (highest quality)
 PRESETS: Dict[str, SwarmPreset] = {
     "quick": SwarmPreset(
         name="Quick Research",
         description="Fast research with minimal depth - good for simple queries",
         max_workers=3,
         max_subtasks=3,
-        planner_model="openai/gpt-5-mini-2025-08-07",  # Fast for simple planning
-        worker_model="openai/gpt-5-mini-2025-08-07",
-        editor_model="openai/gpt-5-mini-2025-08-07",
+        planner_model="openai/claude-opus-4-5-20251101",
+        worker_model="openai/claude-opus-4-5-20251101",
+        editor_model="openai/claude-opus-4-5-20251101",
         search_max_results=5,
     ),
     "balanced": SwarmPreset(
@@ -61,9 +61,9 @@ PRESETS: Dict[str, SwarmPreset] = {
         description="Balance between speed and depth - good for most queries",
         max_workers=5,
         max_subtasks=5,
-        planner_model="openai/claude-opus-4-5-20251101",  # Smart planning
-        worker_model="openai/gpt-5-mini-2025-08-07",  # Fast workers
-        editor_model="openai/claude-opus-4-5-20251101",  # Quality synthesis
+        planner_model="openai/claude-opus-4-5-20251101",
+        worker_model="openai/claude-opus-4-5-20251101",
+        editor_model="openai/claude-opus-4-5-20251101",
         search_max_results=10,
     ),
     "deep": SwarmPreset(
@@ -72,7 +72,7 @@ PRESETS: Dict[str, SwarmPreset] = {
         max_workers=7,
         max_subtasks=10,
         planner_model="openai/claude-opus-4-5-20251101",
-        worker_model="openai/gpt-5-mini-2025-08-07",
+        worker_model="openai/claude-opus-4-5-20251101",
         editor_model="openai/claude-opus-4-5-20251101",
         search_max_results=15,
     ),
@@ -82,7 +82,7 @@ PRESETS: Dict[str, SwarmPreset] = {
         max_workers=5,
         max_subtasks=7,
         planner_model="openai/claude-opus-4-5-20251101",
-        worker_model="openai/gpt-5-mini-2025-08-07",
+        worker_model="openai/claude-opus-4-5-20251101",
         editor_model="openai/claude-opus-4-5-20251101",
         search_max_results=10,
         academic_focus=True,
@@ -93,7 +93,7 @@ PRESETS: Dict[str, SwarmPreset] = {
         max_workers=5,
         max_subtasks=5,
         planner_model="openai/claude-opus-4-5-20251101",
-        worker_model="openai/gpt-5-mini-2025-08-07",
+        worker_model="openai/claude-opus-4-5-20251101",
         editor_model="openai/claude-opus-4-5-20251101",
         search_max_results=10,
     ),
@@ -102,9 +102,9 @@ PRESETS: Dict[str, SwarmPreset] = {
         description="Multi-iteration research with quality control - for comprehensive analysis (20-30 min)",
         max_workers=7,
         max_subtasks=15,
-        planner_model="openai/claude-opus-4-5-20251101",  # Best reasoning for PhD-level
-        worker_model="openai/gpt-5-mini-2025-08-07",  # Fast parallel workers
-        editor_model="openai/claude-opus-4-5-20251101",  # Best synthesis
+        planner_model="openai/claude-opus-4-5-20251101",
+        worker_model="openai/claude-opus-4-5-20251101",
+        editor_model="openai/claude-opus-4-5-20251101",
         search_max_results=15,
         academic_focus=True,
         max_iterations=3,
@@ -115,10 +115,10 @@ PRESETS: Dict[str, SwarmPreset] = {
         name="Express Deep Research",
         description="Quick deep research with 1 iteration - for faster comprehensive results (5-10 min)",
         max_workers=5,
-        max_subtasks=7,  # Reduced from 10 for faster execution
-        planner_model="openai/claude-opus-4-5-20251101",  # Best planning even in express
-        worker_model="openai/gpt-5-mini-2025-08-07",  # Fast workers
-        editor_model="openai/claude-opus-4-5-20251101",  # Quality synthesis
+        max_subtasks=7,
+        planner_model="openai/claude-opus-4-5-20251101",
+        worker_model="openai/claude-opus-4-5-20251101",
+        editor_model="openai/claude-opus-4-5-20251101",
         search_max_results=10,
         academic_focus=True,
         max_iterations=1,

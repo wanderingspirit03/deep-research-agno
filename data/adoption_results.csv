@@ -1,0 +1,144 @@
+agency_name,state,agency_type,officer_count,population_served,status,status_confidence,evidence_count,first_adoption_date,last_verified_date,search_completed,best_evidence_url
+Anchorage Police Department,AK,Municipal Police,,,confirmed,0.95,7,,2025-12-08T17:49:30.391937,True,https://www.eff.org/deeplinks/2025/03/anchorage-police-department-ai-generated-police-reports-dont-save-time
+Casa Grande Police Department,AZ,Municipal Police,,,confirmed,0.8,1,,2025-12-08T17:49:30.392505,True,https://truleo.co/field-notes-voice-generated-reports
+Lake Havasu City Police Department,AZ,Municipal Police,,,confirmed,0.95,7,,2025-12-08T17:49:30.392079,True,https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports
+Phoenix Police Department,AZ,Municipal Police,3000,1700000,no_data,0.0,0,,,False,
+Pima County Sheriff's Department,AZ,Municipal Police,,,pilot,0.85,1,,2025-12-08T17:49:30.392629,True,https://cops.usdoj.gov/html/dispatch/01-2025/ai_reports.html
+Scottsdale Police Department,AZ,Municipal Police,,,pilot,0.9,1,2024-04-01,2025-12-08T17:49:30.392622,True,https://cops.usdoj.gov/html/dispatch/01-2025/ai_reports.html
+Axon told Frederick PD,CA,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.392153,True,https://www.eff.org/deeplinks/2025/07/axons-draft-one-designed-defy-transparency
+Beaumont Police Department,CA,Municipal Police,,,confirmed,0.9,3,2025-12-02,2025-12-08T17:49:30.391861,True,https://pub-chulavista.escribemeetings.com/filestream.ashx?DocumentId=52541
+Berkeley Police Department,CA,Municipal Police,,,confirmed,0.95,4,,2025-12-08T17:49:30.392127,True,https://berkeleyca.gov/sites/default/files/legislative-body-meeting-attachments/2024-05-22%20PAB%20Regular%20Meeting%20Packet.Final_.pdf
+Bishop Police Department,CA,Municipal Police,,,confirmed,0.9,5,,2025-12-08T17:49:30.392212,True,https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports
+Brentwood Police Department,CA,Municipal Police,,,no_data,0.0,1,,2025-12-08T17:49:30.392709,True,https://pub-brentwood.escribemeetings.com/filestream.ashx?DocumentId=19242
+Campbell Police Department,CA,Municipal Police,,,confirmed,0.95,13,2024-06-18,2025-12-08T17:49:30.391824,True,https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports
+Chula Vista Police Department,CA,Municipal Police,,,confirmed,0.95,19,2025-08-01,2025-12-08T17:49:30.391797,True,https://pub-chulavista.escribemeetings.com/filestream.ashx?DocumentId=52541
+Current staffing shortages at Berkeley Police Department,CA,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.392012,True,https://berkeleyca.gov/sites/default/files/legislative-body-meeting-attachments/2024-05-22%20PAB%20Regular%20Meeting%20Packet.Final_.pdf
+East Palo Alto Police Department,CA,Municipal Police,,,confirmed,0.85,1,,2025-12-08T17:49:30.392262,True,https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports
+Fresno Police Department,CA,Municipal Police,,,confirmed,0.95,10,2024-12-01,2025-12-08T17:49:30.392086,True,https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports
+Gilroy Police Department,CA,Municipal Police,,,confirmed,0.9,1,2025-09-01,2025-12-08T17:49:30.392490,True,https://pub-chulavista.escribemeetings.com/filestream.ashx?DocumentId=52541
+Los Angeles Police Department,CA,Municipal Police,9000,3900000,no_data,0.0,0,,,False,
+San Diego Police Department,CA,Municipal Police,1800,1400000,no_data,0.0,0,,,False,
+San Francisco Police Department,CA,Municipal Police,,,confirmed,0.9,4,2024-10-01,2025-12-08T17:49:30.392219,True,https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports
+San Jose Police Department,CA,Municipal Police,1100,1000000,no_data,0.0,0,,,False,
+San Leandro Police Department,CA,Municipal Police,,,probable,0.5,2,,2025-12-08T17:49:30.392384,True,https://sanleandro.int.legistar.com/LegislationDetail.aspx?From=RSS&ID=816956&GUID=EC9A845B-D844-4220-882B-55254372DEEA&FullText=1
+San Mateo Police Department,CA,Municipal Police,,,confirmed,0.95,3,,2025-12-08T17:49:30.392099,True,https://thenationaldesk.com/news/spotlight-on-america/time-saved-or-justice-threatened-police-departments-are-using-ai-to-write-reports-artificial-intelligence-police-policing-officers-shortages-public-safety-body-camera-footage-axon-draft-one-technology
+San Rafael Police Department,CA,Municipal Police,,,confirmed,0.85,2,2024-06-03,2025-12-08T17:49:30.392687,True,https://publicrecords.cityofsanrafael.org/WebLink/DocView.aspx?id=37038&dbid=0&repo=CityofSanRafael
+The Chula Vista Police Department,CA,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.392027,True,https://pub-chulavista.escribemeetings.com/filestream.ashx?DocumentId=52541
+Boulder PD,CO,Municipal Police,,,confirmed,0.95,2,,2025-12-08T17:49:30.391817,True,https://cops.usdoj.gov/html/dispatch/01-2025/ai_reports.html
+Boulder Police Department,CO,Municipal Police,,,confirmed,0.95,16,2024-01-01,2025-12-08T17:49:30.391868,True,https://cops.usdoj.gov/html/dispatch/01-2025/ai_reports.html
+Colorado Springs Police Department,CO,Municipal Police,,,confirmed,0.9,5,,2025-12-08T17:49:30.392191,True,https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports
+Dacono Police Department,CO,Municipal Police,,,confirmed,0.9,1,,2025-12-08T17:49:30.392198,True,https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports
+Denver Police Department,CO,Municipal Police,1500,720000,no_data,0.0,0,,,False,
+Fort Collins Police,CO,Municipal Police,,,confirmed,0.9,1,,2025-12-08T17:49:30.392481,True,https://www.motherjones.com/criminal-justice/2025/08/axon-police-ai-draft-one-foia/
+Fort Collins Police Department,CO,Municipal Police,,,confirmed,0.95,10,,2025-12-08T17:49:30.392005,True,https://www.motherjones.com/criminal-justice/2025/08/axon-police-ai-draft-one-foia/
+Fort Collins Police Services,CO,Municipal Police,,,confirmed,0.95,3,2024-01-01,2025-12-08T17:49:30.392175,True,https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports
+Frederick Police Department,CO,Municipal Police,,,confirmed,0.95,7,,2025-12-08T17:49:30.392184,True,https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports
+Garfield County Sheriff's Office,CO,Municipal Police,,,confirmed,0.95,6,2024-09-15,2025-12-08T17:49:30.391845,True,https://pub-garfield.escribemeetings.com/filestream.ashx?DocumentId=16292
+Lafayette Police Department,CO,Municipal Police,,,confirmed,0.9,1,,2025-12-08T17:49:30.392615,True,https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports
+Littleton Police Department,CO,Municipal Police,,,confirmed,0.95,2,2024-12-17,2025-12-08T17:49:30.392146,True,https://ompnetwork.s3-us-west-2.amazonaws.com/sites/199/documents/12-17-2024_cc_agenda.pdf?2g0lYlsfTPds7O3sSmGm0v91qyXVu72E
+Lone Tree Police Department,CO,Municipal Police,,,confirmed,0.85,2,,2025-12-08T17:49:30.392205,True,https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports
+Oklahoma City Police Department,CO,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.391931,True,https://cops.usdoj.gov/html/dispatch/01-2025/ai_reports.html
+Palm Beach County Sheriff's Office,CO,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.391950,True,https://www.prnewswire.com/news-releases/axon-reimagines-report-writing-with-draft-one-a-first-of-its-kind-ai-powered-force-multiplier-for-public-safety-302124489.html
+Meriden Police Department,CT,Municipal Police,,,confirmed,0.95,2,,2025-12-08T17:49:30.392113,True,https://www.criminallegalnews.org/news/2025/feb/15/police-departments-are-now-using-ai-write-reports/
+New Haven Police Department,CT,Municipal Police,,,confirmed,0.95,4,2024-12-16,2025-12-08T17:49:30.392019,True,https://yale-herald.com/2025/02/22/a-digitized-new-haven-police-investigating-axons-draft-one/
+DHS Office of Inspector General,DC,Municipal Police,,,confirmed,0.7,1,2025-08-01,2025-12-08T17:49:30.392431,True,https://www.fpds.gov/ezsearch/fpdsportal?s=FPDS.GOV&indexName=awardfull&templateName=PDF&q=Axon+DEPARTMENT_FULL_NAME%3A%22HOMELAND+SECURITY%2C+DEPARTMENT+OF%22
+DHS Office of the Inspector General,DC,Municipal Police,,,no_data,0.0,1,,2025-12-08T17:49:30.392573,True,https://www.fpds.gov/ezsearch/fpdsportal?s=FPDS.GOV&indexName=awardfull&templateName=PDF&q=Axon+DEPARTMENT_FULL_NAME%3A%22HOMELAND+SECURITY%2C+DEPARTMENT+OF%22
+Washington Metropolitan Police,DC,Municipal Police,3800,700000,no_data,0.0,0,,,False,
+Wilmington Police Department,DE,Municipal Police,,,no_data,0.0,1,,2025-12-08T17:49:30.392701,True,https://www.wilmingtoncitycouncil.com/wp-content/uploads/2025/06/0063-Ordinance-to-Authorize-Agreement-with-Axon-Enterprise-Inc.-for-Body-Cameras-Tasers-Rel.-Serv.-AATF-W0129153x920B6.pdf
+Florida A&M University Police,FL,Municipal Police,,,no_data,0.0,1,,2025-12-08T17:49:30.392366,True,https://www.lrgvdc.org/downloads/packets/LRGVDC%20Police%20Academy%20SS%20Letter.pdf
+Ocoee Police Department,FL,Municipal Police,,,confirmed,0.85,1,2024-06-01,2025-12-08T17:49:30.392679,True,https://lfapps.ocoee.org/Public/DocView.aspx?id=1416809&dbid=0&repo=Laserfiche
+Palm Beach County Sheriff's Office,FL,Municipal Police,,,confirmed,0.95,19,2024-09-01,2025-12-08T17:49:30.391790,True,https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports
+Tampa Police Department,FL,Municipal Police,,,confirmed,0.9,2,,2025-12-08T17:49:30.392072,True,https://www.axon.com/blog/axons-latest-ai-powered-solutions
+Federal Law Enforcement Training Center,GA,Municipal Police,,,no_data,0.0,1,,2025-12-08T17:49:30.392565,True,https://www.fpds.gov/ezsearch/fpdsportal?s=FPDS.GOV&indexName=awardfull&templateName=PDF&q=Axon+DEPARTMENT_FULL_NAME%3A%22HOMELAND+SECURITY%2C+DEPARTMENT+OF%22
+Federal Law Enforcement Training Center (FLETC),GA,Municipal Police,,,confirmed,0.75,1,2023-11-28,2025-12-08T17:49:30.392424,True,https://www.fpds.gov/ezsearch/fpdsportal?s=FPDS.GOV&indexName=awardfull&templateName=PDF&q=Axon+DEPARTMENT_FULL_NAME%3A%22HOMELAND+SECURITY%2C+DEPARTMENT+OF%22
+Lilburn Police Department,GA,Municipal Police,,,no_data,0.0,1,,2025-12-08T17:49:30.392398,True,https://www.lrgvdc.org/downloads/packets/LRGVDC%20Police%20Academy%20SS%20Letter.pdf
+Honolulu Police Department,HI,Municipal Police,,,confirmed,0.95,2,2025-11-01,2025-12-08T17:49:30.392140,True,https://www.civilbeat.org/2025/11/advocates-fear-surveillance-creep-if-hpd-starts-using-ai-to-write-reports/
+Chicago Police Department,IL,Municipal Police,12000,2700000,no_data,0.0,0,,,False,
+DeKalb Police Department,IL,Municipal Police,,,confirmed,0.85,2,2026-01-01,2025-12-08T17:49:30.392269,True,https://www.cityofdekalb.com/DocumentCenter/View/19809/11-Res-2025-085
+Elgin Police Department,IL,Municipal Police,,,confirmed,0.85,1,,2025-12-08T17:49:30.392236,True,https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports
+Joliet Police Department,IL,Municipal Police,,,confirmed,0.95,14,2024-12-17,2025-12-08T17:49:30.391831,True,https://joliet.legistar.com/LegislationDetail.aspx?ID=7369979&GUID=5B884846-8CEB-4B34-9678-A96A4D9108B1&FullText=1
+Mount Vernon Police Department,IL,Municipal Police,,,confirmed,0.85,1,,2025-12-08T17:49:30.392226,True,https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports
+Mt. Vernon Police Department,IL,Municipal Police,,,confirmed,0.9,1,,2025-12-08T17:49:30.392783,True,https://cops.usdoj.gov/html/dispatch/01-2025/ai_reports.html
+Springfield Police Department,IL,Municipal Police,,,confirmed,0.85,1,2024-11-01,2025-12-08T17:49:30.392416,True,https://www.wandtv.com/news/springfield-police-department-sign-5-8-million-dollar-contract-for-technology-and-software/article_f541932c-a149-11ef-90ed-4b16f051dc6f.html
+Winnebago County Sheriff's Office,IL,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.391984,True,https://www.rockrivercurrent.com/2025/05/winnebago-county-sheriffs-department-to-test-new-ai-tool-to-reduce-report-writing-time/
+Government Documents Show Police,IN,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.391881,True,https://www.motherjones.com/criminal-justice/2025/08/axon-police-ai-draft-one-foia/
+IN Police Department,IN,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.392044,True,https://www.compiler.news/axion-ai-body-camera-police/
+Indianapolis Police Department,IN,Municipal Police,1700,880000,no_data,0.0,0,,,False,
+Lafayette PD,IN,Municipal Police,,,confirmed,0.95,2,,2025-12-08T17:49:30.391888,True,https://www.motherjones.com/criminal-justice/2025/08/axon-police-ai-draft-one-foia/
+Lafayette Police Department,IN,Municipal Police,,,confirmed,0.95,18,2024-05-28,2025-12-08T17:49:30.391804,True,https://www.motherjones.com/criminal-justice/2025/08/axon-police-ai-draft-one-foia/
+Palm Beach County Sheriff's Office,IN,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.391915,True,https://www.eff.org/deeplinks/2025/07/axons-draft-one-designed-defy-transparency
+Supplied list to Frederick Police Department,IN,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.391970,True,https://www.politico.com/newsletters/digital-future-daily/2024/09/04/axon-ai-police-reports-00177331
+Tippecanoe County Sheriff's Office,IN,Municipal Police,,,no_data,0.0,1,,2025-12-08T17:49:30.392407,True,https://www.lrgvdc.org/downloads/packets/LRGVDC%20Police%20Academy%20SS%20Letter.pdf
+Boston Police Department,MA,Municipal Police,2100,700000,no_data,0.0,0,,,False,
+Frederick Police Department,MD,Municipal Police,,,confirmed,0.85,1,,2025-12-08T17:49:30.392777,True,https://www.eff.org/deeplinks/2025/07/axons-draft-one-designed-defy-transparency
+Hagerstown Police Department,MD,Municipal Police,,,no_data,0.0,1,,2025-12-08T17:49:30.392391,True,https://www.lrgvdc.org/downloads/packets/LRGVDC%20Police%20Academy%20SS%20Letter.pdf
+IRS Criminal Investigations,MD,Municipal Police,,,confirmed,0.6,1,2025-09-25,2025-12-08T17:49:30.392535,True,https://www.highergov.com/contract/2032H524D00007-2023H225F00141/
+Royal Oak Police Department,MI,Municipal Police,,,confirmed,0.95,4,2024-11-11,2025-12-08T17:49:30.392119,True,https://pub-royaloak.escribemeetings.com/filestream.ashx?DocumentId=4038
+Bloomington Police Department,MN,Municipal Police,,,pilot,0.85,1,,2025-12-08T17:49:30.392723,True,https://www.govtech.com/artificial-intelligence/police-in-st-paul-minn-implement-first-ai-use-policy
+Brooklyn Park Police Department,MN,Municipal Police,,,pilot,0.9,1,,2025-12-08T17:49:30.392716,True,https://www.govtech.com/artificial-intelligence/police-in-st-paul-minn-implement-first-ai-use-policy
+Dakota County Attorney's Office,MN,Municipal Police,,,not_adopted,0.85,1,,2025-12-08T17:49:30.392745,True,https://www.eff.org/deeplinks/2025/07/axons-draft-one-designed-defy-transparency
+Eagan Police Department,MN,Municipal Police,,,confirmed,0.95,2,,2025-12-08T17:49:30.392058,True,https://www.govtech.com/artificial-intelligence/police-in-st-paul-minn-implement-first-ai-use-policy
+Hennepin County Attorney's Office,MN,Municipal Police,,,not_adopted,0.9,1,,2025-12-08T17:49:30.392753,True,https://www.eff.org/deeplinks/2025/07/axons-draft-one-designed-defy-transparency
+St. Paul Police Department,MN,Municipal Police,,,not_adopted,0.95,1,,2025-12-08T17:49:30.392738,True,https://www.govtech.com/artificial-intelligence/police-in-st-paul-minn-implement-first-ai-use-policy
+Tampa Police Department,MN,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.391957,True,https://www.axon.com/blog/axons-latest-ai-powered-solutions
+Woodbury Police Department,MN,Municipal Police,,,probable,0.4,1,,2025-12-08T17:49:30.392731,True,https://www.govtech.com/artificial-intelligence/police-in-st-paul-minn-implement-first-ai-use-policy
+Ferguson Police Department,MO,Municipal Police,,,confirmed,0.95,10,2025-03-01,2025-12-08T17:49:30.391838,True,https://www.fergusoncity.com/DocumentCenter/View/7366/Resolution-2024-52-Axon
+Using AI to Write Police,MT,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.392160,True,https://cops.usdoj.gov/html/dispatch/01-2025/ai_reports.html
+Fredericton Police Force,NB,Municipal Police,,,confirmed,0.9,1,,2025-12-08T17:49:30.392770,True,https://www.axon.com/blog/axons-latest-ai-powered-solutions
+Alternative AI Police,NC,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.391902,True,https://truleo.co/field-notes-voice-generated-reports
+Burlington Police Department,NC,Municipal Police,,,confirmed,0.8,1,,2025-12-08T17:49:30.392497,True,https://truleo.co/field-notes-voice-generated-reports
+Charlotte-Mecklenburg Police Department,NC,Municipal Police,2100,880000,no_data,0.0,0,,,False,
+Manchester Police Department,NH,Municipal Police,,,not_adopted,0.65,1,,2025-12-08T17:49:30.392466,True,https://seattle.gov/documents/Departments/OPA/ManagementAction/2024-OPA-0333_MAR_04-04-25.pdf
+Palm Beach County Sheriff's Office,NH,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.391991,True,https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports
+SPD should develop a policy on the use of AI for department related purposes and consider incorporating existing City of Seattle policy on GenAI directly into SPD,NH,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.391874,True,https://seattle.gov/documents/Departments/OPA/ManagementAction/2024-OPA-0333_MAR_04-04-25.pdf
+Bernalillo County Sheriff's Office,NM,Municipal Police,,,confirmed,0.95,5,2025-07-28,2025-12-08T17:49:30.391924,True,https://citydesk.org/2025/07/28/bernalillo-county-sheriffs-office-to-launch-ai-powered-technology-suite/
+Las Vegas Metropolitan Police,NV,County Sheriff,3000,650000,no_data,0.0,0,,,False,
+Alfred State College Police,NY,Municipal Police,,,no_data,0.0,1,,2025-12-08T17:49:30.392352,True,https://wwe2.osc.state.ny.us/transparency/contracts/contractresults.cfm?ID=5195
+CUNY Campus Police,NY,Municipal Police,,,probable,0.5,1,,2025-12-08T17:49:30.392296,True,https://wwe2.osc.state.ny.us/transparency/contracts/contractresults.cfm?ID=5195
+City University of New York Police,NY,Municipal Police,,,no_data,0.0,1,,2025-12-08T17:49:30.392549,True,https://wwe2.osc.state.ny.us/transparency/contracts/contractresults.cfm?ID=5195
+MTA Police,NY,Municipal Police,,,probable,0.5,1,,2025-12-08T17:49:30.392289,True,https://wwe2.osc.state.ny.us/transparency/contracts/contractresults.cfm?ID=5195
+Metropolitan Transportation Authority Police,NY,Municipal Police,,,no_data,0.0,1,,2025-12-08T17:49:30.392542,True,https://wwe2.osc.state.ny.us/transparency/contracts/contractresults.cfm?ID=5195
+Monroe County Sheriff's Office,NY,Municipal Police,,,confirmed,0.9,1,,2025-12-08T17:49:30.392243,True,https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports
+NY Division of State Police,NY,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.391999,True,https://wwe2.osc.state.ny.us/transparency/contracts/contractresults.cfm?ID=5195
+New York City Police Department,NY,Municipal Police,36000,8300000,no_data,0.0,0,,,False,
+New York Department of Corrections and Community Supervision,NY,Municipal Police,,,probable,0.6,2,,2025-12-08T17:49:30.392282,True,https://wwe2.osc.state.ny.us/transparency/contracts/contractresults.cfm?ID=5195
+New York State Police,NY,Municipal Police,,,probable,0.6,2,,2025-12-08T17:49:30.392275,True,https://wwe2.osc.state.ny.us/transparency/contracts/contractresults.cfm?ID=5195
+SUNY Cortland Police,NY,Municipal Police,,,no_data,0.0,1,,2025-12-08T17:49:30.392337,True,https://wwe2.osc.state.ny.us/transparency/contracts/contractresults.cfm?ID=5195
+SUNY Oneonta Police,NY,Municipal Police,,,no_data,0.0,1,,2025-12-08T17:49:30.392344,True,https://wwe2.osc.state.ny.us/transparency/contracts/contractresults.cfm?ID=5195
+SUNY Oswego Police,NY,Municipal Police,,,no_data,0.0,1,,2025-12-08T17:49:30.392310,True,https://wwe2.osc.state.ny.us/transparency/contracts/contractresults.cfm?ID=5195
+SUNY Potsdam Police,NY,Municipal Police,,,no_data,0.0,1,,2025-12-08T17:49:30.392330,True,https://wwe2.osc.state.ny.us/transparency/contracts/contractresults.cfm?ID=5195
+SUNY Stony Brook Police,NY,Municipal Police,,,no_data,0.0,1,,2025-12-08T17:49:30.392303,True,https://wwe2.osc.state.ny.us/transparency/contracts/contractresults.cfm?ID=5195
+Columbus Police Department,OH,Municipal Police,1900,900000,no_data,0.0,0,,,False,
+Oklahoma City Police Department,OK,Municipal Police,,,confirmed,0.95,13,,2025-12-08T17:49:30.391944,True,https://cops.usdoj.gov/html/dispatch/01-2025/ai_reports.html
+Somerset County Sheriff's Office,OK,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.391963,True,https://www.centralmaine.com/2025/07/27/somerset-county-sheriff-deputies-ai-saves-time-writing-reports/
+Portland Police,OR,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.392133,True,https://www.portland.gov/council/documents/ordinance/passed/191548
+Portland Police Bureau,OR,Municipal Police,,,confirmed,0.85,3,2023-12-13,2025-12-08T17:49:30.392557,True,https://www.portland.gov/council/documents/ordinance/passed/191548
+Washington County Sheriff's Office,OR,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.391977,True,https://countryherald.com/news/washington-county-oregon-deputies-pilot-ai-powered-report-writing-for-60-days/
+Philadelphia Police Department,PA,Municipal Police,6300,1600000,no_data,0.0,0,,,False,
+Marine Corps Air Station Beaufort Provost Marshal's Office,SC,Municipal Police,,,confirmed,0.75,1,2025-04-01,2025-12-08T17:49:30.392446,True,https://www.fpds.gov/ezsearch/fpdsportal?s=FPDS.GOV&indexName=awardfull&templateName=PDF&q=Axon+DEPARTMENT_FULL_NAME%3A%22HOMELAND+SECURITY%2C+DEPARTMENT+OF%22
+Addison Police Department,TX,Municipal Police,,,confirmed,0.9,1,2025-10-28,2025-12-08T17:49:30.392672,True,https://agendas.addisontx.gov/docs/2025/CM/20251028_7489/6082_Presentation_-_LET_Solutions_Purchase_Agreement_(Axon).pdf
+Austin Police Department,TX,Municipal Police,1900,1000000,no_data,0.0,0,,,False,
+Brenham Police Department,TX,Municipal Police,,,confirmed,0.8,1,,2025-12-08T17:49:30.392512,True,https://truleo.co/field-notes-voice-generated-reports
+Burleson Police Department,TX,Municipal Police,,,probable,0.7,1,,2025-12-08T17:49:30.392527,True,https://mccmeetingspublic.blob.core.usgovcloudapi.net/burlesontx-meet-4b51b9ff8ffa4fe589cf492fbe7bcb82/ITEM-Attachment-001-ceb633161abf40f1bc309d22c175f73f.pdf
+Burleson TX Police Department,TX,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.391908,True,https://mccmeetingspublic.blob.core.usgovcloudapi.net/burlesontx-meet-4b51b9ff8ffa4fe589cf492fbe7bcb82/ITEM-Attachment-001-ceb633161abf40f1bc309d22c175f73f.pdf
+Dallas Police Department,TX,Municipal Police,3500,1300000,no_data,0.0,0,,,False,
+Fort Worth Police Department,TX,Municipal Police,1700,950000,no_data,0.0,0,,,False,
+Houston Police Department,TX,Municipal Police,5300,2300000,no_data,0.0,0,,,False,
+Kaufman County Constable's Office Precinct 2,TX,Municipal Police,,,confirmed,0.85,1,2024-10-01,2025-12-08T17:49:30.392520,True,https://truleo.co/field-notes-voice-generated-reports
+Kyle Police Department,TX,Municipal Police,,,confirmed,0.85,2,2025-11-01,2025-12-08T17:49:30.392473,True,https://pub-chulavista.escribemeetings.com/filestream.ashx?DocumentId=52541
+LRGVDC Regional Police Academy,TX,Municipal Police,,,no_data,0.0,1,,2025-12-08T17:49:30.392358,True,https://www.lrgvdc.org/downloads/packets/LRGVDC%20Police%20Academy%20SS%20Letter.pdf
+Round Rock Police Department,TX,Municipal Police,,,confirmed,0.85,1,2024-09-12,2025-12-08T17:49:30.392643,True,https://documents.roundrocktexas.gov/WebLink/DocView.aspx?id=1623055&dbid=0&repo=CORR
+San Antonio Police Department,TX,Municipal Police,2500,1500000,no_data,0.0,0,,,False,
+U.S. Marshals Service - Southern Texas,TX,Municipal Police,,,confirmed,0.7,1,2025-05-01,2025-12-08T17:49:30.392439,True,https://www.fpds.gov/ezsearch/fpdsportal?s=FPDS.GOV&indexName=awardfull&templateName=PDF&q=Axon+DEPARTMENT_FULL_NAME%3A%22HOMELAND+SECURITY%2C+DEPARTMENT+OF%22
+Wichita Falls Police Department,TX,Municipal Police,,,confirmed,0.85,1,2023-12-05,2025-12-08T17:49:30.392694,True,https://weblink-public.wichitafallstx.gov/WebLink8_Pub/DocView.aspx?id=2102664&dbid=0&repo=Wichita-Falls
+A Look at the Saratoga Springs Police Department,UT,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.392106,True,https://cedarvalleysentinel.com/public-safety/police-and-fire-2025/ai-in-blue-a-look-at-the-saratoga-springs-police-departments-new-tech/
+Saratoga Springs Police Department,UT,Municipal Police,,,confirmed,0.95,3,2025-10,2025-12-08T17:49:30.392051,True,https://cedarvalleysentinel.com/public-safety/police-and-fire-2025/ai-in-blue-a-look-at-the-saratoga-springs-police-departments-new-tech/
+South Jordan Police Department,UT,Municipal Police,,,confirmed,0.95,10,2024-09-01,2025-12-08T17:49:30.392092,True,https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports
+King County District Attorney's Office,WA,Municipal Police,,,not_adopted,0.85,2,,2025-12-08T17:49:30.392582,True,https://www.motherjones.com/criminal-justice/2025/08/axon-police-ai-draft-one-foia/
+King County Prosecuting Attorney's Office,WA,Municipal Police,,,not_adopted,0.95,3,,2025-12-08T17:49:30.392255,True,https://cops.usdoj.gov/html/dispatch/01-2025/ai_reports.html
+King County Sheriff's Office,WA,Municipal Police,,,not_adopted,0.85,1,,2025-12-08T17:49:30.392607,True,https://www.geekwire.com/2024/internal-memo-dont-use-ai-for-police-reports-prosecutor-tells-seattle-area-law-enforcement/
+Palm Beach County Sheriff's Office,WA,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.392037,True,https://www.eff.org/deeplinks/2025/07/axons-draft-one-designed-defy-transparency
+Pasco Police Department,WA,Municipal Police,,,confirmed,0.9,3,,2025-12-08T17:49:30.392590,True,https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports
+Prosecuting Attorney Memo Rejecting AI Police,WA,Municipal Police,,,confirmed,0.95,1,,2025-12-08T17:49:30.391895,True,https://www.geekwire.com/2024/internal-memo-dont-use-ai-for-police-reports-prosecutor-tells-seattle-area-law-enforcement/
+Seattle Police Department,WA,Municipal Police,1400,750000,confirmed,0.95,5,,2025-12-08T17:49:30.391770,True,https://www.geekwire.com/2024/internal-memo-dont-use-ai-for-police-reports-prosecutor-tells-seattle-area-law-enforcement/
+Laramie Police Department,WY,Municipal Police,,,confirmed,0.95,11,2024-08-06,2025-12-08T17:49:30.391852,True,https://www.cityoflaramie.org/AgendaCenter/ViewFile/Item/18012?fileID=25826

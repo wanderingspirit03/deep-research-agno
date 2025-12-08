@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Research System Architecture</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f6f8;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .legend {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+        }
+        .legend h3 { margin-top: 0; }
+        .tech-stack {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .tech-item {
+            text-align: center;
+        }
+        .tech-label {
+            font-weight: bold;
+            color: #7f8c8d;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+        .tech-value {
+            font-size: 1.1em;
+            color: #2c3e50;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Deep Research Multi-Agent Architecture</h1>
+        
+        <div class="mermaid">
+            %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#3498db', 'edgeLabelBackground':'#ffffff', 'tertiaryColor': '#f1f1f1'}}}%%
+            graph TD
+                User([👤 User]) -->|Query| Main[Main Controller]
+                
+                subgraph "Phase 1: Planning"
+                    Main --> Planner[🧠 Planner Agent]
+                    Planner -->|Decomposes Query| Plan[Research Plan]
+                    style Planner fill:#f39c12,stroke:#d35400,color:white
+                end
+                
+                subgraph "Phase 2: Parallel Execution & Loop"
+                    Plan -->|Distributes Subtasks| Workers
+                    
+                    subgraph "Swarm Execution"
+                        Workers[👷 Parallel Workers]
+                        
+                        Workers -->|Web Search| Internet((🌐 Internet))
+                        Workers -->|Academic Papers| Papers((📄 Papers))
+                        Workers -->|Store Findings| KB[(🗄️ Knowledge Base\nLanceDB)]
+                        
+                        style Workers fill:#3498db,stroke:#2980b9,color:white
+                    end
+                    
+                    KB -->|Read Findings| Critic[🧐 Critic Agent]
+                    Critic -->|Evaluate Quality| Decision{Quality Threshold?}
+                    
+                    Decision -->|No (Iterate)| NewPlan[Update Plan]
+                    NewPlan --> Workers
+                    Decision -->|Yes| Experts
+                    
+                    style Critic fill:#9b59b6,stroke:#8e44ad,color:white
+                end
+                
+                subgraph "Phase 3: Expert Analysis"
+                    Experts[🎓 Domain Experts]
+                    
+                    Experts -->|Technical View| Tech[Technical Expert]
+                    Experts -->|Industry View| Ind[Industry Expert]
+                    Experts -->|Skeptic View| Skeptic[Skeptic Expert]
+                    
+                    Tech -->|Insights| KB
+                    Ind -->|Insights| KB
+                    Skeptic -->|Insights| KB
+                    
+                    style Experts fill:#2ecc71,stroke:#27ae60,color:white
+                end
+                
+                subgraph "Phase 4: Synthesis"
+                    KB -->|All Findings| Editor[✍️ Editor Agent]
+                    Editor -->|Synthesize| Report[📄 Final Report]
+                    
+                    style Editor fill:#e74c3c,stroke:#c0392b,color:white
+                end
+                
+                Main -->|Clean Up| Cleanup[🧹 Database Cleanup]
+                Report --> User
+        </div>
+
+        <div class="legend">
+            <h3>Architecture Components</h3>
+            <ul>
+                <li><strong>Planner Agent (Claude Opus 4.5)</strong>: Strategically breaks down complex queries into parallelizable subtasks.</li>
+                <li><strong>Worker Agents (Claude Opus 4.5)</strong>: Execute research subtasks in parallel using web search and document reading tools.</li>
+                <li><strong>Knowledge Base (LanceDB)</strong>: Central vector store that accumulates findings, enabling asynchronous communication between agents.</li>
+                <li><strong>Critic Agent (Claude Opus 4.5)</strong>: Evaluates research quality and determines if more iterations are needed.</li>
+                <li><strong>Domain Experts</strong>: Provide specialized perspectives (Technical, Industry, Skeptic) to enrich the analysis.</li>
+                <li><strong>Editor Agent (Claude Opus 4.5)</strong>: Synthesizes all gathered information into a cohesive, comprehensive report.</li>
+            </ul>
+        </div>
+
+        <div class="tech-stack">
+            <div class="tech-item">
+                <div class="tech-label">Orchestration</div>
+                <div class="tech-value">Agno Workflow</div>
+            </div>
+            <div class="tech-item">
+                <div class="tech-label">Models</div>
+                <div class="tech-value">Claude Opus 4.5</div>
+            </div>
+            <div class="tech-item">
+                <div class="tech-label">Memory</div>
+                <div class="tech-value">LanceDB Vector Store</div>
+            </div>
+            <div class="tech-item">
+                <div class="tech-label">Tools</div>
+                <div class="tech-value">Perplexity, Arxiv, Exa</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+</body>
+</html>
