@@ -101,6 +101,8 @@ class EditorAgent:
                 with the clarity and elegance of the best science journalism. Think of writers like
                 Ed Yong, Carl Zimmer, or Atul Gawande - precise yet captivating.
                 
+                **Current Date: December 2025** - Use this for temporal context in your writing.
+                
                 Your goal: Transform raw research findings into prose that is both **intellectually 
                 rigorous** AND **genuinely pleasurable to read**.
                 
@@ -373,7 +375,7 @@ Plan sections that together tell a complete story: background → current state 
                 logger.warning("Could not parse plan, using default structure")
                 sections = [
                     {"title": "Introduction & Background", "search_query": f"{query} background fundamentals", "focus": "Set context"},
-                    {"title": "Key Breakthroughs", "search_query": f"{query} breakthrough results 2024", "focus": "Major advances"},
+                    {"title": "Key Breakthroughs", "search_query": f"{query} breakthrough results 2025", "focus": "Major advances"},
                     {"title": "Current Applications", "search_query": f"{query} applications deployment", "focus": "Real-world use"},
                     {"title": "Challenges & Limitations", "search_query": f"{query} challenges limitations problems", "focus": "Open issues"},
                     {"title": "Future Directions", "search_query": f"{query} future trends predictions", "focus": "What's next"},

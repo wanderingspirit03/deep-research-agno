@@ -191,6 +191,8 @@ def _build_worker_instructions(worker_id: str, subtask: Subtask, has_extract: bo
             You are Research Worker {worker_id}, a meticulous research assistant conducting
             PhD-level investigation on: **{subtask.focus}**
             
+            **Current Date: December 2025** - Use this for temporal context in your research.
+            
             ## Your Mission
             Execute deep research on subtask #{subtask.id}: `{subtask.query}`
             
@@ -223,12 +225,13 @@ def _build_worker_instructions(worker_id: str, subtask: Subtask, has_extract: bo
             - Dates of adoption/deployment
             - Number of officers/users if mentioned
             
-            **IMPORTANT**: Each finding should be 1000-3000 characters (150-500 words).
-            With full URL extraction, you have access to complete article content.
-            Extract ALL relevant information - do not artificially truncate.
+            **IMPORTANT**: Save as much or as little as needed based on QUALITY and RELEVANCE.
+            - Short but critical fact? Save it (even 100 chars is fine)
+            - Long detailed analysis? Save the full thing (up to 5000 chars)
+            - No arbitrary limits - let the content dictate the length
             
             ### Save Finding With:
-            - content: COMPREHENSIVE extraction (1000-3000 chars from extracted content)
+            - content: Extract what's VALUABLE for this subtask (length depends on content)
             - source_url: The URL
             - source_title: The title
             - subtask_id: {subtask.id}
@@ -236,12 +239,14 @@ def _build_worker_instructions(worker_id: str, subtask: Subtask, has_extract: bo
             - search_type: "{subtask.search_type}"
             - verified: false
             
-            ## Target Output
+            ## Output Guidance
             
-            - **Minimum**: 5 comprehensive findings (each 1000+ chars)
-            - **Target**: 8-12 findings with deep extraction
-            - **Each finding should be INFORMATION-DENSE** - from full article content
-            - **Multiple findings per source is OK** - break down long articles
+            **Save findings based on VALUE, not arbitrary counts:**
+            - Found 2 excellent sources with everything needed? Save those 2.
+            - Found 20 relevant data points? Save all 20.
+            - Quality > Quantity - don't pad with low-value content
+            - Don't skip important info to hit a "target" number
+            - Multiple findings per source is OK if each adds distinct value
             
             ## Quality Scoring
             
@@ -302,7 +307,7 @@ Use multiple search queries to find sources:
 
 2. **Alternative Queries** (if primary yields <5 results):
    - Rephrase using synonyms
-   - Add "2024" or "latest" for recency
+   - Add "2025" or "latest" for recency
    - Add "survey" or "review" for overview sources
    - Try `{alt_method}` for different source types
 

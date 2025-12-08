@@ -249,14 +249,13 @@ class KnowledgeTools(Toolkit):
         """
         Save a research finding to the knowledge base.
         
-        IMPORTANT: Call this explicitly for each valuable finding you discover.
-        EXTRACT COMPREHENSIVE CONTENT - aim for 500-2000 characters per finding.
+        IMPORTANT: Call this for each valuable finding. Save based on QUALITY, not quantity.
         
         Args:
-            content: COMPREHENSIVE finding text (500-2000 chars recommended).
-                     Include ALL relevant details: stats, quotes, methodology,
-                     comparisons, limitations, technical specs, outcomes.
-                     More detail is ALWAYS better.
+            content: Finding text - length should match the value of the content.
+                     - Short critical fact (100-300 chars)? Save it.
+                     - Detailed analysis with stats (1000-3000 chars)? Save it all.
+                     - No arbitrary limits - let content quality dictate length.
             source_url: URL where the finding was discovered (required)
             source_title: Title of the source page
             subtask_id: ID of the subtask that found this
@@ -287,11 +286,8 @@ class KnowledgeTools(Toolkit):
             # Generate unique ID
             finding_id = str(uuid.uuid4())[:8]
             
-            # Truncate content to prevent context window overflow (max 1500 chars)
-            MAX_CONTENT_LENGTH = 1500
-            if len(content) > MAX_CONTENT_LENGTH:
-                content = content[:MAX_CONTENT_LENGTH] + "..."
-                logger.info(f"Truncated finding content to {MAX_CONTENT_LENGTH} chars")
+            # No truncation - workers decide how much content is valuable
+            # They are instructed to save based on quality, not arbitrary limits
             
             # Calculate quality score for this finding
             quality_score = _calculate_quality_score(content, search_type, verified)

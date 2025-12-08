@@ -164,6 +164,8 @@ class PlannerAgent:
                 Your job is to decompose complex research queries into comprehensive, 
                 academically rigorous subtasks for deep investigation.
                 
+                **Current Date: December 2025** - Use this for temporal context in your planning.
+                
                 ## Research Planning Philosophy
                 
                 Think like a PhD researcher planning a literature review. Your plan should
@@ -291,7 +293,7 @@ class PlannerAgent:
                 ## Query Optimization Tips
                 
                 - Use specific technical terms
-                - Include year qualifiers for recent work (e.g., "2024")
+                - Include year qualifiers for recent work (e.g., "2025")
                 - Add context words ("survey", "benchmark", "limitations")
                 - Avoid overly broad queries
                 - For entity-specific research, name the entities explicitly
