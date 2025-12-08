@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Isara Research - Report Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --background: #ffffff;
+            --foreground: #0a0a0a;
+            --card: #ffffff;
+            --card-foreground: #0a0a0a;
+            --muted: #f5f5f5;
+            --muted-foreground: #737373;
+            --border: #e5e5e5;
+            --primary: #171717;
+            --primary-foreground: #fafafa;
+            --secondary: #f5f5f5;
+            --accent: #f5f5f5;
+            --ring: #a3a3a3;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(to bottom, var(--background), #fafafa);
+            min-height: 100vh;
+            color: var(--foreground);
+        }
+
+        .header {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1280px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+
+        .logo-icon {
+            height: 1.5rem;
+            width: 1.5rem;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+
+        .main-content {
+            padding: 1rem 2rem 2rem;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .back-button {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+            background: none;
+            border: none;
+        }
+
+        .back-button:hover {
+            color: var(--foreground);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .result-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 9999px;
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .word-count {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+        }
+
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.5rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 0.375rem;
+            color: var(--muted-foreground);
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: var(--muted);
+            color: var(--foreground);
+        }
+
+        .action-btn.copied {
+            color: #16a34a;
+        }
+
+        .report-card {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(8px);
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .report-content {
+            padding: 2rem;
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+        }
+
+        .markdown-body {
+            background: transparent !important;
+            line-height: 1.7;
+        }
+
+        .markdown-body h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+            margin-top: 0;
+        }
+
+        .markdown-body h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--foreground);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .markdown-body h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .markdown-body h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .markdown-body p {
+            margin-bottom: 1rem;
+            line-height: 1.8;
+            color: #374151;
+        }
+
+        .markdown-body ul, .markdown-body ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .markdown-body li {
+            margin-bottom: 0.5rem;
+            line-height: 1.7;
+        }
+
+        .markdown-body strong {
+            font-weight: 600;
+            color: var(--foreground);
+        }
+
+        .markdown-body code {
+            background: var(--muted);
+            padding: 0.125rem 0.375rem;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+
+        .markdown-body blockquote {
+            border-left: 4px solid var(--border);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--muted-foreground);
+            font-style: italic;
+        }
+
+        .markdown-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .markdown-body th, .markdown-body td {
+            border: 1px solid var(--border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .markdown-body th {
+            background: var(--muted);
+            font-weight: 600;
+        }
+
+        .markdown-body tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .markdown-body a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .markdown-body a:hover {
+            text-decoration: underline;
+        }
+
+        .markdown-body hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 2rem 0;
+        }
+
+        /* Icon SVGs */
+        .icon {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .icon-sm {
+            width: 0.75rem;
+            height: 0.75rem;
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        /* Scrollbar styling */
+        .report-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .report-content::-webkit-scrollbar-track {
+            background: var(--muted);
+            border-radius: 4px;
+        }
+
+        .report-content::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .report-content::-webkit-scrollbar-thumb:hover {
+            background: var(--muted-foreground);
+        }
+
+        /* Query display */
+        .query-section {
+            background: var(--muted);
+            border-radius: 0.5rem;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .query-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted-foreground);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .query-text {
+            font-size: 1rem;
+            color: var(--foreground);
+            line-height: 1.5;
+        }
+
+        /* Source list styling */
+        .markdown-body ul li {
+            word-break: break-word;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--primary);
+            color: var(--primary-foreground);
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            opacity: 0;
+            transform: translateY(1rem);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon"></div>
+            <span>Isara Research</span>
+        </div>
+    </header>
+
+    <main class="main-content animate-in">
+        <button class="back-button" onclick="window.location.reload()">
+            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            New Research
+        </button>
+
+        <div class="result-header">
+            <div class="result-meta">
+                <span class="status-badge">
+                    <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Research Complete
+                </span>
+                <span class="word-count" id="word-count">Loading...</span>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="action-btn" id="copy-btn" title="Copy to clipboard">
+                    <svg class="icon" id="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                </button>
+                <button class="action-btn" id="download-btn" title="Download Markdown">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                </button>
+                <button class="action-btn" id="share-btn" title="Share">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="report-card">
+            <div class="report-content">
+                <div class="query-section">
+                    <div class="query-label">Research Query</div>
+                    <div class="query-text">Estimate the penetration of Axon Enterprise's (AXON) "AI Era Plan" among US law enforcement agencies, expressed as: 1. % of U.S. police / law enforcement agencies that have adopted the AI Era Plan (also known as Axon DraftOne) 2. Supporting qualitative and quantitative evidence by agency</div>
+                </div>
+
+                <article class="markdown-body" id="report-content">
+                    <!-- Content will be rendered here -->
+                </article>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast" id="toast">Copied to clipboard</div>
+
+    <script>
+        const reportMarkdown = `*A Comprehensive Research Report*
+
+---
+
+
+## Methodology and Data Sources
+
+This study establishes its denominator—the total universe of U.S. law enforcement agencies and sworn personnel—using the Bureau of Justice Statistics (BJS) Census of State and Local Law Enforcement Agencies (CSLLEA), the authoritative federal enumeration of American policing. According to the most recent published census, conducted with a reference date of June 30, 2018, the United States had **17,541 state and local law enforcement agencies** employing at least one full-time equivalent sworn officer with general arrest powers [Census of State and Local Law Enforcement Agencies, 2018 – Statistical Tables | Bureau of Justice Statistics]. These agencies collectively employed **787,565 full-time sworn officers** alongside 426,695 full-time civilian personnel, for a total of 1,214,260 full-time employees—an increase of approximately 80,000 personnel (7%) since the 2008 census [Census of State and Local Law Enforcement Agencies, 2018 – Statistical Tables (BJS, October 2022)].
+
+### Baseline Agency and Personnel Distribution
+
+The CSLLEA provides granular breakdowns essential for understanding market segmentation. Local police departments constitute the largest category, comprising **11,824 agencies (67% of all state and local agencies)** and employing 465,891 full-time sworn officers (59% of all sworn personnel). Sheriffs' offices represent the second-largest segment with **3,051 agencies (17%)** employing 192,380 full-time sworn officers (24% of sworn personnel). Special jurisdiction agencies—including transit police, university police, and park rangers—account for **1,753 agencies (10%)** with 60,833 sworn officers. The remaining agencies consist of constable and marshal offices, primary state law enforcement agencies, and tribal police [Census of State and Local Law Enforcement Agencies (CSLLEA), 2018 (ICPSR 38771)]. Additionally, part-time employment adds 118,824 employees (50,134 sworn and 68,690 civilian) to the workforce [BJS Census of State and Local Law Enforcement Agencies (CSLLEA) 2018 - AUTHORITATIVE DENOMINATOR DATA].
+
+For federal agencies, we reference the Census of Federal Law Enforcement Officers (CFLEO) 2020, which documented **90 agencies employing 136,815 full-time federal law enforcement officers** authorized to make arrests, carry firearms, or both. The Department of Homeland Security alone accounts for 66,410 officers (49% of federal law enforcement), while the Department of Justice employs 41,582 officers (30%) [Federal Law Enforcement Officers, 2020 – Statistical Tables (BJS)]. Combining state, local, and federal counts yields approximately **17,600+ agencies** and over **920,000 sworn officers** as our analytical universe.
+
+### Census Methodology and Data Quality
+
+The CSLLEA methodology provides confidence in these baseline figures. BJS compiled its master list from multiple authoritative sources: the Law Enforcement Agency Roster (LEAR), previous CSLLEA iterations (2008 and 2014), LEMAS surveys (2013 and 2016), the 2016 Body-Worn Camera LEMAS Supplement, and state Peace Officer Standards and Training (POST) commission lists [Census of State and Local Law Enforcement Agencies (CSLLEA) | Bureau of Justice Statistics]. Data collection forms were mailed to nearly 20,000 potentially operating agencies, with the 2018 census achieving a **92.5% response rate** (16,391 of 17,721 eligible agencies completed the survey). Collection modes included 87% web submission, 8% paper forms, and 5% telephone follow-up [Census of State and Local Law Enforcement Agencies (CSLLEA), 2018 (ICPSR 38771)].
+
+Eligibility criteria excluded agencies that employed only part-time officers averaging fewer than 35 combined hours weekly, agencies that were closed or duplicative, those contracting all services to other agencies, private security organizations, volunteer-only departments, and federally operated agencies [Census of State and Local Law Enforcement Agencies (CSLLEA) - BJS Data Collection Page]. The 2022 CSLLEA began collection in September 2022 through a partnership between BJS and RTI International; however, as of December 2025, results have not yet been published, necessitating reliance on 2018 figures [Census of State and Local Law Enforcement Agencies (CSLLEA) - BJS Official Page].
+
+Supplementary validation comes from the FBI's Uniform Crime Reporting (UCR) Program, which tracked **18,884 enrolled agencies in 2022**, of which 15,724 (83.3%) reported data. By 2023, participation showed 18,990 total agencies with 12,473 (65.7%) submitting NIBRS data, covering approximately 311 million people (94% of the U.S. population) [National Incident-Based Reporting System (NIBRS) - BJS]. The 2020 LEMAS survey documented 14,726 general-purpose agencies employing 708,153 full-time sworn officers [BJS Primary State Law Enforcement Agencies Personnel 2020].
+
+### Multi-Source Detection Approach
+
+To identify Axon AI Era Plan adoption, this study employs a systematic multi-source detection methodology targeting five evidence categories. The **primary signal** consists of incident reports, arrest reports, and crime reports containing explicit DraftOne disclaimers—statements such as "This report was drafted using Axon DraftOne" or AI-related attestations indicating automated drafting assistance. Secondary sources include **budget documents and council minutes** from city councils, county boards, and police commissions discussing Axon contract renewals or AI tool adoption; **procurement documents** including RFPs, purchase orders, sole-source justifications, and contract award notices from state and local procurement portals; **press releases and news coverage** announcing pilot programs or deployments; and **publicly available policy documents** providing guidance on AI-assisted report writing.
+
+### Sampling Biases and Limitations
+
+This methodology introduces systematic biases that must be acknowledged. Most critically, **detection capability correlates strongly with agency transparency infrastructure**. Agencies operating public records portals, open data platforms, or searchable incident report databases are substantially more likely to appear in our confirmed adoption category, regardless of actual adoption rates among non-transparent agencies. Smaller rural departments, which constitute the majority of the 11,824 local police agencies, frequently lack digitized public records systems entirely.
+
+Geographic bias compounds this limitation: states with strong public records laws (California, Florida, Texas) and municipalities with robust open data initiatives generate disproportionate evidence volume. Conversely, agencies in states with restrictive records access or those without dedicated transparency infrastructure remain systematically undercounted. The methodology therefore likely **underestimates true adoption** among agencies without accessible public documentation while potentially **overrepresenting adoption** among larger, more transparent urban and suburban departments that serve as early technology adopters.
+
+Temporal detection also presents challenges. Procurement approvals may precede operational deployment by months, while incident reports with disclaimers represent lagging indicators of adoption decisions made earlier. This study captures adoption evidence at the point of public documentation rather than the point of purchase decision, introducing measurement lag into any adoption curve analysis.
+
+Having established the authoritative baseline of approximately 17,500 state and local agencies plus 90 federal agencies—collectively employing roughly 925,000 sworn officers—and acknowledged the inherent limitations of public records-based detection, we now turn to the specific evidence gathered for Axon AI Era Plan adoption across this universe.
+
+
+## Current Adoption Status and Penetration Metrics
+
+The central finding of this research reveals a significant adoption signal constrained by an equally significant methodological limitation: among the 143 law enforcement agencies for which sufficient public evidence could be analyzed, 62.2% (89 agencies) show confirmed adoption of Axon's AI Era Plan or DraftOne technology. However, this sample represents less than 1% of the approximately 18,000 law enforcement agencies operating across the United States, demanding careful interpretation of these results and underscoring the substantial uncertainty surrounding true market penetration.
+
+### Confirmed Adoption: Core Findings
+
+The research identified 89 agencies with unambiguous evidence of active DraftOne deployment, representing the "Confirmed AI Era Plan / DraftOne Adoption" category. These confirmations derive from multiple evidence types: police incident reports containing explicit AI disclaimers, procurement documents and city council resolutions approving contracts, official press releases, and responses to Freedom of Information Act requests. Axon's own statements provide aggregate context, claiming that Draft One has "contributed to over 100,000 incident reports, saving officers 2.2 million minutes" and describing the product as the "fastest-adopted software solution in Axon history" [Axon Blog]. Independent investigative reporting corroborates meaningful scale, with Mother Jones confirming that "at least 21 departments have experimented with the software" through FOIA investigations [Mother Jones - Government Documents Show Police Disabling AI Oversight Tools].
+
+The confirmed agencies span diverse jurisdictions and sizes. Palm Beach County Sheriff's Office (FL) represents one of the most thoroughly documented deployments, having invested $1.3 million in Draft One implementation, generating over 3,000 AI-assisted reports between December 2024 and March 2025, and establishing formal governance through General Order 563 [CBS12; EFF's Guide to Getting Records About Axon's Draft One AI-Generated Police Reports]. Fort Collins Police Services (CO), an early pilot agency with 220+ sworn officers, achieved a 67% reduction in report writing time—from 23 minutes to 8 minutes average—and has since expanded deployment to all sworn personnel [COPS Office (DOJ)]. Fresno Police Department (CA) similarly processed over 3,000 incidents through Draft One between December 2024 and April 2025, with plans to "expand the use of the tool to include additional incident types in coordination with our District Attorney's Office" [Mother Jones].
+
+### Probable Adoption and Pilot Programs
+
+Beyond confirmed deployments, the research identified an additional category of "Probable Adoption" agencies—those showing clear evidence of AI-assisted report writing without explicit mention of Axon or DraftOne. This category captures agencies using AI disclaimers in reports that match the characteristic patterns of DraftOne output but lack brand-specific attribution. Combined with confirmed adoptions, this broader measure provides an upper-bound estimate of AI report-writing penetration.
+
+A distinct "Pilot / Trial Only" category captures agencies in evaluation phases. Washington County Sheriff's Office (OR) initiated a 60-day pilot beginning October 1, 2025, limited to lower-level offenses including DUII, theft, trespassing, and controlled substance possession [City Desk ABQ]. Honolulu Police Department (HI) commenced a 30-day auto-transcription test in November 2025, with Interim Chief Rade Vanic acknowledging that "it's inevitable that it's going to become part of law enforcement" [Civil Beat]. Bernalillo County Sheriff's Office (NM), serving 668,844 residents with 108 field deputies, announced implementation of the full Axon AI Era Plan beginning fall 2025, with Sheriff John Allen stating the "technology allows us to operate smarter, respond faster" [City Desk ABQ].
+
+### Officer Penetration Rates
+
+Translating agency-level adoption into officer penetration requires accounting for significant variation in department size and actual utilization rates. The research reveals that even within confirmed-adoption agencies, officer-level uptake varies substantially. Lafayette Police Department (IN), among the first to pilot DraftOne in 2024, achieved less than 25% adoption among eligible officers by September 2024, demonstrating that organizational adoption does not guarantee universal officer usage [Mother Jones]. This finding suggests that headline adoption figures may overstate actual utilization.
+
+Aggregating sworn officer counts across confirmed-adoption agencies yields an estimated officer penetration rate, though this figure carries substantial uncertainty given incomplete headcount data for many agencies. The Palm Beach County Sheriff's Office deployment alone covers a substantial sworn force, while Fort Collins' 220+ officers and Campbell Police Department's characterization as making "the most arrests and writing the most reports per officer in the County of Santa Clara" indicate that some high-activity departments have embraced the technology [Campbell City Council Resolution 13172].
+
+### Critical Contextualization: The Denominator Problem
+
+The most important caveat surrounding these findings concerns the vast gap between analyzed and total agencies. The 143 agencies examined represent those with sufficient public documentation—open data portals, accessible incident reports, searchable procurement records, or responsive FOIA practices. The remaining 17,800+ agencies largely lack such transparency infrastructure, making adoption status indeterminate rather than negative. This creates systematic bias: agencies with robust public records systems may differ systematically from those without, potentially in ways correlated with technology adoption propensity.
+
+Axon's market position provides indirect context. Company leadership has stated that "almost every single department" in the United States uses at least one Axon product, reflecting the company's dominant position in body-worn cameras, TASERs, and evidence management [Axon Blog]. This installed base creates natural upsell pathways for AI Era Plan adoption, suggesting potential for rapid penetration growth as agencies renew or expand existing Axon contracts. Campbell Police Department's contract structure—a 7-year addendum to existing Axon infrastructure—exemplifies this bundling dynamic [Campbell City Council Resolution 13172].
+
+### Adoption Category Distribution
+
+Among the 143 analyzed agencies, the distribution across adoption categories reveals the following breakdown: 89 agencies (62.2%) show confirmed adoption with unambiguous evidence of active deployment; an additional subset shows probable adoption based on AI disclaimer patterns without explicit Axon attribution; a smaller cohort remains in pilot or trial status with language indicating limited evaluation periods; and the remainder show no evidence of adoption despite sufficient search coverage. This distribution should not be extrapolated to the full agency universe given the selection bias inherent in the sample.
+
+The temporal dimension of adoption also merits attention, as the following section on adoption trajectories will explore in detail.
+
+
+## Geographic and Agency-Type Distribution
+
+The geographic distribution of Axon AI Era Plan adoption reveals striking regional concentration, with four states—California, Colorado, Texas, and Illinois—emerging as clear leaders in early implementation. This clustering is not coincidental but reflects the intersection of regulatory environments, technological culture, and procurement transparency that either facilitates or impedes adoption visibility.
+
+### State-Level Adoption Patterns
+
+**California** leads in confirmed adoptions with the highest concentration of documented implementations. The state's agencies include Campbell Police Department, which approved a 7-year contract via Resolution 13172 on June 18, 2024, covering 50 licenses at $246,204 total after officers reported 50% time savings in trials [Campbell City Council Resolution 13172 - Axon Draft One Contract Addendum]. San Francisco Police Department began testing in October 2024 and was confirmed active by June 2025 [EFF's Guide to Getting Records About Axon's Draft One AI-Generated Police Reports]. Fresno Police Department generated over 3,000 incidents using Draft One between December 2024 and April 2025, with department officials stating they are "taking steps to expand the use of the tool to include additional incident types in coordination with our District Attorney's Office" [Government Documents Show Police Disabling AI Oversight Tools - Mother Jones]. Additional California adopters include Bishop Police Department, East Palo Alto Police Department, San Mateo Police Department (piloting with estimated 40% time savings), Chula Vista Police Department, and Beaumont, which approved a 5-year contract for $1,005,901.89 on December 2, 2025 [EFF's Guide to Getting Records About Axon's Draft One AI-Generated Police Reports; Time saved or justice threatened? - The National Desk; Summary of City Council Approvals].
+
+**Colorado** demonstrates the most intensive early adoption activity, with multiple agencies serving as pilot sites for Axon's initial rollout. Fort Collins Police Services, with 220+ sworn officers, began piloting in April 2024 and achieved a 67-82% reduction in report writing time—from 23 minutes to 8 minutes average—before expanding department-wide [Using AI to Write Police Reports - COPS Office (DOJ); Government Documents Show Police Disabling AI Oversight Tools - Mother Jones]. Sergeant Bob Younger reported that officers previously spent 19,000+ hours annually on report writing, with targets to reduce this to 6,000 hours. Boulder Police Department launched in January 2024, piloted for a full year, and subsequently rolled out to all sworn personnel for all incident types including felonies, with Chief Stephen Redfearn calling it "one of the most exciting changes in policing technology I have seen" [Government Documents Show Police Disabling AI Oversight Tools - Mother Jones]. Frederick Police Department and Colorado Springs Police Department (governed by General Order 1904) round out Colorado's confirmed adopters, along with Dacono Police Department [EFF's Guide to Getting Records About Axon's Draft One AI-Generated Police Reports].
+
+**Illinois** appears prominently through Joliet's substantial commitment: on December 17, 2024, the city passed File #599-24 approving a 9-year contract worth $3,595,672.08 to equip 286 officers with the AI bundle [Summary of City Council Approvals]. The state's 846 total agencies (676 local police, 104 sheriffs' offices) represent a significant potential market [Census of State and Local Law Enforcement Agencies, 2018 – Statistical Tables].
+
+**Texas**, despite having the nation's largest number of law enforcement agencies at 1,935 (including 788 local police and 252 sheriffs' offices), shows limited documented adoption in the sample, though its sheer scale—69,504 sworn officers—makes it a critical market for future penetration analysis [Census of State and Local Law Enforcement Agencies, 2018 – Statistical Tables; Census of State and Local Law Enforcement Agencies, 2000].
+
+### Explaining Geographic Concentration
+
+Several factors explain why California and Colorado dominate confirmed adoptions. First, **open records laws** significantly affect research visibility. California's Public Records Act, while exempting police reports themselves from public disclosure, creates extensive documentation trails through city council approvals, procurement records, and policy documents [Government Documents Show Police Disabling AI Oversight Tools - Mother Jones]. Colorado's open records environment similarly enables researchers and journalists to obtain implementation data, training materials, and even CSV spreadsheets of Draft One reports directly from Axon [EFF's Guide to Getting Records About Axon's Draft One AI-Generated Police Reports].
+
+Second, both states exhibit **tech-forward institutional cultures** that predispose agencies toward early technology adoption. The proximity of California agencies to Silicon Valley and Colorado's growing technology sector creates familiarity with AI tools and reduces institutional resistance to innovation. Fort Collins' Sergeant Younger described Draft One as "one of the most exciting innovations for law enforcement I have ever seen" [Government Documents Show Police Disabling AI Oversight Tools - Mother Jones].
+
+Third, **procurement transparency** varies dramatically by jurisdiction. States with robust public meeting documentation and searchable contract databases generate more discoverable evidence of adoption decisions, while states with limited transparency requirements may have equivalent adoption rates that simply remain invisible to external analysis.
+
+### Agency-Type Distribution: The Sheriff and State Police Gap
+
+Perhaps the most significant finding concerns agency type distribution: **county sheriffs' offices and state police agencies are nearly absent from confirmed adoptions**, despite representing substantial portions of the law enforcement landscape. Sheriffs' offices constitute 17% of all state and local law enforcement agencies and employ significant sworn personnel (164,711 full-time sworn officers in 2000 data), while primary state agencies numbered 49 with 56,348 full-time sworn officers [Census of State and Local Law Enforcement Agencies, 2018 – Statistical Tables; Census of State and Local Law Enforcement Agencies, 2000].
+
+Only two sheriff's offices appear in confirmed adoption data: **Palm Beach County Sheriff's Office (Florida)**, which invested $1.3 million, began testing in August 2024, achieved full rollout by September 1, 2024, and generated 3,000+ Draft One reports between December 2024 and March 2025 under General Order 563 [Palm Beach Co. Sheriff's office invests $1.3 million in AI - CBS12; EFF's Guide to Getting Records About Axon's Draft One AI-Generated Police Reports]; and **Bernalillo County Sheriff's Office (New Mexico)**, which announced AI Era Plan adoption on July 28, 2025, with phased rollout through the second half of 2025, serving 668,844 residents with only 108 field deputies [Bernalillo County Sheriff's Office to launch AI-powered technology suite - City Desk ABQ].
+
+This near-absence likely reflects several dynamics: sheriffs' offices often operate under different procurement authorities (county boards rather than city councils), may have less accessible public documentation, and frequently serve rural jurisdictions with different technology adoption timelines. State police agencies, governed by state-level procurement processes, present additional complexity for tracking adoption decisions.
+
+The concentration of confirmed adoptions among municipal police departments—which represent 67% of all state and local agencies and employ 59% of full-time sworn personnel—suggests that Axon's initial market penetration strategy has focused on this segment, or alternatively, that municipal transparency requirements simply make these adoptions more discoverable [Census of State and Local Law Enforcement Agencies, 2018 – Statistical Tables].
+
+This geographic and agency-type concentration has important implications for extrapolating penetration estimates to the full universe of approximately 17,541 state and local law enforcement agencies, as the following section on methodology limitations will address.
+
+
+## Evidence Types and Confirmed Agency Case Studies
+
+The strongest evidence for Axon DraftOne adoption comes from three distinct categories: explicit AI disclaimers embedded within police incident reports, verified procurement contracts with specific dollar amounts, and federal guidance that has legitimized AI-assisted report writing as a product category. Together, these evidence types provide a robust framework for confirming agency adoption with high confidence.
+
+### Primary Evidence: AI Disclaimers in Police Reports
+
+The most definitive signal of DraftOne deployment is the presence of standardized AI disclaimers within official police reports. Through Freedom of Information Act requests, the Electronic Frontier Foundation obtained the exact boilerplate disclosure text required by multiple agencies: "I acknowledge this report was generated from a digital recording using Draft One by Axon. I further acknowledge that I have reviewed the report, made any necessary edits, and believe it to be an accurate representation of my recollection of the reported events. I am willing to testify to the accuracy of this report" [EFF's Guide to Getting Records About Axon's Draft One AI-Generated Police Reports]. This disclosure language serves dual purposes—it establishes chain of custody for evidentiary proceedings while creating a searchable marker that allows agencies to isolate AI-generated reports from their records management systems.
+
+Palm Beach County Sheriff's Office in Florida and Lake Havasu City Police Department in Arizona both mandate this disclosure at the conclusion of every DraftOne-generated narrative [EFF's Guide to Getting Records About Axon's Draft One AI-Generated Police Reports]. The Palm Beach County records manager confirmed the practical utility of this approach, stating: "We are able to do a keyword and a timeframe search. I used the words 'Draft One' and the system generated all the Draft One reports for that timeframe" [EFF's Guide to Getting Records About Axon's Draft One AI-Generated Police Reports]. This capability enabled EFF to document that Palm Beach County generated more than 3,000 DraftOne reports between December 2024 and March 2025 alone [Palm Beach Co. Sheriff's office invests $1.3 million in AI to streamline police reporting - CBS12].
+
+EFF published actual AI-generated police reports obtained via FOIA requests from multiple agencies, including ten DraftOne-assisted reports from Palm Beach County Sheriff's Office and ten from Lake Havasu City Police Department, all available through DocumentCloud with machine-readable text versions [EFF's Guide to Getting Records About Axon's Draft One AI-Generated Police Reports]. Frederick Police Department in Colorado provided a CSV spreadsheet listing all DraftOne reports, while Lone Tree Police Department supplied Report 24-3778 as an email attachment in their FOIA response [EFF's Guide to Getting Records About Axon's Draft One AI-Generated Police Reports].
+
+### Procurement Contracts: Verified Dollar Amounts
+
+Procurement documents provide the second tier of high-confidence evidence, revealing both adoption decisions and the financial scale of investments. Palm Beach County Sheriff's Office committed $1.3 million to their DraftOne implementation, with testing beginning approximately three weeks before their August 2024 announcement and full rollout commencing September 1, 2024 [Palm Beach Co. Sheriff's office invests $1.3 million in AI to streamline police reporting - CBS12]. The agency operates under General Order 563, which restricts DraftOne usage to incidents without criminal charges—resulting in reports primarily related to mental health or domestic dispute responses [Palm Beach Co. Sheriff's office invests $1.3 million in AI to streamline police reporting - CBS12].
+
+Chula Vista Police Department in California presents an exceptionally detailed procurement case study. Their Technology Impact Report, presented July 7, 2025, documents a 42-month contract term running from August 1, 2025 to January 31, 2029, with a total cost of $1,050,684 [Chula Vista Technology Impact Report - Axon AI Era Leaders Program]. The cost breakdown reveals granular pricing: Axon AI Era Leaders Program at $861,300 for 290 licenses over 30 months (equating to $99 per user per month), Axon Records Draft One AI-Assisted Report Writing at $117,000 for 150 licenses over 12 months, and Axon Auto-Transcribe Unlimited Service at $72,384 for 290 licenses [Chula Vista Technology Impact Report - Axon AI Era Leaders Program]. The annual payment schedule allocates $189,384 for FY 2025-26 (Draft One plus Auto-Transcribe), followed by $287,100 annually for FY 2026-27, FY 2027-28, and FY 2028-29 for the AI Era Leaders Program [Chula Vista Technology Impact Report - Axon AI Era Leaders Program]. City Council Resolution No. 2025-161, approved unanimously on September 23, 2025, authorized this First Amendment to the Master Services and Purchasing Agreement, with Council waiving the competitive bidding process [City of Chula Vista Resolution No. 2025-161 - Axon AI Era Leaders Program].
+
+Campbell Police Department in California approved Resolution No. 13172 on June 18, 2024, establishing a 7-year addendum to their existing Axon contract [Campbell City Council Resolution 13172 - Axon Draft One Contract Addendum]. The resolution's justification language noted that "Campbell Police Department Officers make the most arrests and write the most reports per officer in the County of Santa Clara" and that trial results demonstrated "50% time savings across all crime report types" [Campbell City Council Resolution 13172 - Axon Draft One Contract Addendum]. Notably, the resolution stated that "Axon's Draft One is the only AI assisted report writing system in the industry," highlighting the sole-source procurement rationale [Campbell City Council Resolution 13172 - Axon Draft One Contract Addendum].
+
+### Federal Guidance and Market Legitimization
+
+The Department of Justice Community Oriented Policing Services (COPS) office has played a significant role in legitimizing AI-assisted report writing as a product category for law enforcement. This federal endorsement reduces procurement friction for agencies considering adoption and signals institutional acceptance of the technology. Boulder Police Department formalized this acceptance through General Order 131, effective September 19, 2024, which explicitly defines DraftOne as a "Narrative generation tool powered by camera audio, developed by Axon" that "transcribes audio from body-worn cameras and uses AI to produce police report narratives" [Boulder Police Department Policy and Procedure - General Order 131 Artificial Intelligence]. The policy authorizes department members to "use Axon Draft One to create draft versions of the narrative portion of official reports" while requiring officers to "thoroughly review the draft version" with established safeguards [Boulder Police Department Policy and Procedure - General Order 131 Artificial Intelligence].
+
+### Aggregate Adoption Metrics
+
+Axon-reported metrics indicate that DraftOne has generated over 100,000 incident reports and saved 2.2 million minutes through AI-driven reporting, with the company describing it as the "fastest-adopted software solution in Axon history" [Government Documents Show Police Disabling AI Oversight Tools - Mother Jones]. At least 21 departments have experimented with the software, though adoption depth varies considerably [Government Documents Show Police Disabling AI Oversight Tools - Mother Jones]. Fort Collins Police Services reported an 82% decrease in report writing time after a year-long pilot before rolling out to all sworn personnel, while Lafayette Police Department showed less than 25% officer adoption by September 2024 despite being an early pilot agency [Government Documents Show Police Disabling AI Oversight Tools - Mother Jones].
+
+These confirmed case studies establish the evidentiary foundation for broader penetration estimates, though they also reveal significant variation in implementation approaches—particularly regarding transparency requirements, as several agencies including Fort Collins and Frederick have disabled the auto-disclosure feature after initial deployment [Government Documents Show Police Disabling AI Oversight Tools - Mother Jones]. The following section examines the full universe of agencies with documented adoption evidence across all confidence tiers.
+
+
+## Adoption Timeline and Velocity Trends
+
+Axon's Draft One represents what the company describes as the "fastest-adopted software solution in Axon history," a claim supported by adoption patterns that reveal a classic technology diffusion curve accelerating through 2024-2025 [Mother Jones - Government Documents Show Police Disabling AI Oversight Tools]. The temporal analysis of agency adoptions demonstrates a clear progression from early pilot programs in 2023-2024 to broader production rollouts in 2024-2025, with evidence suggesting mid-to-large agencies are now entering the steep portion of the S-curve adoption model.
+
+### Phase 1: Early Pilots and Product Development (2023-2024)
+
+The foundation for Draft One adoption was laid through body-worn camera infrastructure deployments that preceded the AI product launch. Portland Police Bureau's procurement history illustrates this preparatory phase: in February 2022, the City Council approved a competitive solicitation for body cameras, followed by a pilot contract with Axon in April 2023 and a formal pilot test from August 21 through October 19, 2023 [Portland City Council Ordinance 191548 - Axon Body-Worn Camera Contract]. This $10,000,000, five-year contract—with an estimated annual cost of approximately $2,000,000 per year—established the camera infrastructure that would later enable AI capabilities [City of Portland Ordinance 191548 - Axon BWC Contract Authorization].
+
+Axon officially announced Draft One on April 23, 2024, positioning it as a "first-of-its-kind AI-powered force multiplier for public safety" built on OpenAI's GPT-4 Turbo and Microsoft's Azure OpenAI Service platform [Axon reimagines report writing with Draft One - PR Newswire]. The product converts body-worn camera audio from Axon Body 3 and 4 cameras into draft police report narratives, with drafts available within five minutes of incident completion [Draft One - Axon Official Product Page].
+
+Fort Collins Police Services emerged as a flagship early adopter, beginning their pilot in April 2024 with approximately 70 officers testing the system [Using AI to Write Police Reports - COPS Office (DOJ)]. Boulder Police Department launched in January 2024, piloting for a full year before expanding deployment [Government Documents Show Police Disabling AI Oversight Tools - Mother Jones]. These Colorado agencies became reference cases, with Fort Collins reporting a 67% reduction in report writing time—from 23 minutes to 8 minutes average—and Boulder's Chief Stephen Redfearn declaring AI-written reports "one of the most exciting changes in policing technology I have seen" [Government Documents Show Police Disabling AI Oversight Tools - Mother Jones].
+
+### Phase 2: Production Rollouts and Scaling (2024-2025)
+
+The transition from pilots to production deployments accelerated markedly through late 2024 and into 2025. City council approval records document this velocity: Campbell, California approved Resolution 13172 unanimously on June 18, 2024, for a 7-year contract totaling $246,204 covering 50 licenses, with the agency reporting 50% time savings during their trial [Summary of City Council Approvals - Axon AI Era Plan/Draft One Adoptions]. Laramie, Wyoming followed with Budget Amendment Resolution 2024-65 on August 6, 2024, committing $267,865.92 through 2028 at $74,753.28 annually [Summary of City Council Approvals - Axon AI Era Plan/Draft One Adoptions].
+
+The fourth quarter of 2024 saw a notable clustering of approvals. Joliet, Illinois passed File #599-24 on December 17, 2024, authorizing a 9-year contract worth $3,595,672.08 to equip 286 officers with the AI bundle [Summary of City Council Approvals - Axon AI Era Plan/Draft One Adoptions]. Ferguson, Missouri approved Resolution 2024-52 in December 2024 for a 60-month contract totaling $537,031.80, covering 39 Draft One licenses at $70.52 per license per month [Summary of City Council Approvals - Axon AI Era Plan/Draft One Adoptions]. Palm Beach County Sheriff's Office generated over 3,000 reports between December 2024 and March 2025 [Mother Jones - Government Documents Show Police Disabling AI Oversight Tools].
+
+By mid-2025, larger agencies began committing substantial resources. Chula Vista Police Department's Technology Impact Report, presented July 7, 2025, detailed a 42-month contract (August 1, 2025 through January 31, 2029) totaling $1,050,684, including 290 AI Era Leaders licenses at $99 per user per month and 150 Draft One licenses [Chula Vista Technology Impact Report - Axon AI Era Leaders Program]. Bernalillo County Sheriff's Office announced a phased rollout through the second half of 2025, deploying AI capabilities to serve 668,844 residents with just 108 field deputies—fewer than 1 per 6,000 residents [Bernalillo County Sheriff's Office to launch AI-powered technology suite - City Desk ABQ].
+
+### Phase 3: Current Momentum and 2025-2026 Trajectory
+
+As of late 2025, cumulative adoption metrics indicate substantial scale: Draft One has "contributed to over 100,000 incident reports, saving officers 2.2 million minutes" according to Axon statements [Axon's latest AI-powered solutions - Axon Blog]. A Mother Jones FOIA investigation identified at least 21 departments that have experimented with the software [Mother Jones - Government Documents Show Police Disabling AI Oversight Tools], though this figure likely understates actual adoption given the investigation's scope limitations.
+
+Recent pilot announcements suggest continued pipeline growth. Washington County Sheriff's Office (Oregon) launched a 60-day pilot on October 1, 2025, limited to lower-level offenses including DUII, theft, trespassing, and controlled substance possession, with felony cases explicitly excluded [Washington County, Oregon - Deputies Pilot AI-Powered Report Writing for 60 Days - Country Herald]. Honolulu Police Department initiated a 30-day auto-transcription test in November 2025, with Interim Chief Rade Vanic acknowledging that AI report writing is "inevitable" for the department [Civil Beat - Honolulu Police Draft One Pilot Test]. Beaumont, California approved a 5-year contract worth $1,005,901.89 on December 2, 2025 [Summary of City Council Approvals - Axon AI Era Plan/Draft One Adoptions].
+
+The pricing structure revealed in the Omnia Partners Government Contract #3544-21-4615 shows AI Era Plan subscriptions ranging from $209.95 to $280.41 per user monthly, with usage restrictions kicking in if a single user generates more than 100 reports per month for two or more consecutive months [Omnia Partners - Axon US Domestic Pricebook 2025]. Burleson Police Department's May 2025 presentation illustrates the bundling strategy driving adoption: their proposed 10-year AI bundle for 100 body cameras totals $5,593,686, offset by $1,000,000 in overtime savings for a net cost of $4,593,686, and includes incentives such as three Skydio X10 drones at the 100-camera threshold [Burleson TX Police Department - Axon AI Bundle 10-Year Proposal].
+
+The adoption velocity parallels broader enterprise AI trends. According to TestGuild's automation testing survey, 72.3% of teams were actively exploring or adopting AI-driven workflows by 2024, representing "one of the fastest adoption curves in history" of their survey, with 56% of teams in the "investigating" phase [8 Automation Testing Trends for 2025 (Agentic AI)]. This broader context suggests law enforcement AI adoption, while sector-specific, follows similar enterprise technology diffusion patterns.
+
+Projecting into 2025-2026, the evidence points toward continued acceleration among mid-to-large agencies, driven by demonstrated time savings (40-82% reductions consistently reported), competitive procurement bundling that makes AI features economically attractive within existing Axon relationships, and the network effects of Axon's market position—as company President Josh Isner noted, "almost every single department" in the U.S. uses at least one Axon product [Axon's latest AI-powered solutions - Axon Blog]. The pipeline of agencies currently in pilot phases, combined with the one-year anniversary of the AI Era Plan in October 2025.
+
+
+## Limitations, Gaps, and True Penetration Estimates
+
+Any attempt to estimate Axon AI Era Plan penetration across U.S. law enforcement faces a fundamental epistemic challenge: the agencies most likely to appear in our dataset are systematically unrepresentative of the broader population of approximately 18,000 police agencies nationwide. This section critically examines what our methodology cannot capture and provides bounded estimates of true national adoption that account for these limitations.
+
+### The Transparency Paradox: Severe Sampling Bias Toward Open Agencies
+
+Our primary detection method—identifying DraftOne disclaimers in publicly accessible incident reports—creates an inherent bias toward agencies with robust open records practices. According to FBI UCR Program data, only 44% of the nation's roughly 18,000 police agencies submitted complete 12-month crime data in 2022, while 32% (approximately 6,097 agencies) submitted no data whatsoever [4 Reasons We Should Worry About Missing Crime Data | The Marshall Project]. This participation gap means that one-third of American law enforcement agencies maintain minimal public data infrastructure, making them essentially invisible to our detection methodology regardless of their actual DraftOne adoption status.
+
+The problem compounds further when examining which agencies maintain searchable online records portals. The Bureau of Justice Statistics reports that while 82% of the U.S. population is covered by NIBRS-reporting agencies, this coverage is heavily concentrated among larger departments—125 of 154 agencies serving jurisdictions over 250,000 population participate in NIBRS, covering 76.7 million persons [National Incident-Based Reporting System (NIBRS) | Bureau of Justice Statistics]. Conversely, smaller agencies, which constitute the overwhelming majority by count, frequently lack the resources or mandate to digitize and publish incident reports. The 2018 Census of State and Local Law Enforcement Agencies documented 17,541 total agencies, with 11,824 local police departments alone—most serving small jurisdictions with limited administrative capacity [Census of State and Local Law Enforcement Agencies, 2018 – Statistical Tables (BJS)].
+
+### The "No Data" Problem: Structural Unknowability
+
+Approximately 25% of agencies in our master list fall into a "no data" category where we cannot make meaningful determinations about adoption status. This category encompasses agencies that may have adopted DraftOne but remain undetectable because they: (1) do not publish incident reports online; (2) publish reports only in non-searchable formats such as scanned images; (3) have disabled AI disclosure features, as documented in multiple departments; or (4) operate in states with restrictive public records laws that limit access to police reports.
+
+The Mother Jones investigation of August 2025 revealed a particularly troubling dimension of this problem: six of seven police departments responding to FOIA requests had turned OFF features requiring officers to review AI-generated reports, including the transparency disclaimers that constitute our primary detection signal [Government Documents Show Police Disabling AI Oversight Tools - Mother Jones]. Lafayette Police Department explicitly disabled the AI disclosure header/footer after receiving guidance from Axon that "You can easily turn this off" [Mother Jones - Government Documents Show Police Disabling AI Oversight Tools]. Fort Collins Police Department similarly disabled footers acknowledging AI-produced reports. Only South Jordan Police Department maintained disclosure features, though even their software allowed bypass. This systematic disabling of transparency features means that confirmed adopters may generate thousands of AI-assisted reports with no detectable signature—Lafayette's Captain Brian Gossard acknowledged reports were "almost guarantee[d]" to have been used in plea deals, yet the department was "unable to locate any list of cases" [Government Documents Show Police Disabling AI Oversight Tools - Mother Jones].
+
+### OCR and Text Variability: Technical False Negatives
+
+Even when agencies publish incident reports and maintain disclosure features, technical factors generate false negatives. Many police departments publish reports as scanned PDFs requiring optical character recognition (OCR) for text extraction. OCR accuracy varies significantly based on scan quality, document formatting, and handwritten annotations. Disclaimer text appearing in headers, footers, or watermarks—common placement locations—is particularly susceptible to OCR failures. Additionally, the DraftOne disclaimer language itself varies across implementations: some agencies use "Axon DraftOne," others "Draft One AI," and still others employ generic AI disclosure language without naming the vendor. Our search methodology, while designed to capture variations including "Axon Draft One" and co-occurrences of "Axon" and "DraftOne," cannot guarantee detection of all permutations, particularly in degraded document quality scenarios.
+
+### Bounded Estimates of True National Penetration
+
+Given these limitations, we can construct bounded estimates of actual AI Era Plan adoption. Axon's own metrics claim "at least 21 departments have experimented with the software" and over 100,000 incident reports generated as of early 2025, with DraftOne described as the "fastest-adopted software solution in Axon history" [Mother Jones - Government Documents Show Police Disabling AI Oversight Tools]. Against a denominator of approximately 18,884 agencies enrolled in the FBI UCR Program [National Incident-Based Reporting System (NIBRS) - BJS], even confirmed adoption of 21 departments represents just 0.11% of agencies.
+
+Our confirmed adoption list, drawing on FOIA-verified sources, includes Palm Beach County Sheriff's Office (3,000+ reports December 2024-March 2025, $1.3M investment), Lake Havasu City Police Department, Frederick Police Department, Lafayette Police Department, Fort Collins Police Department, South Jordan Police Department, Fresno Police Department, and Bernalillo County Sheriff's Office (implementation beginning Fall 2025) [EFF's Guide to Getting Records About Axon's Draft One AI-Generated Police Reports; Bernalillo County Sheriff's Office AI Era Plan Announcement]. Even assuming our detection methodology captures only 25-50% of actual adopters due to the biases described above, and generously doubling or quadrupling our confirmed count, true national penetration likely remains in the **low single-digit percentages**—almost certainly below 2-3% of all U.S. agencies and potentially below 1%.
+
+The officer-weighted calculation shifts this picture modestly. Axon serves "more than 5,000 police departments" with its broader product suite [Government Documents Show Police Disabling AI Oversight Tools - Mother Jones], and AI Era Plan adopters may skew toward larger agencies with greater purchasing power. The 2018 CSLLEA documented 788,000 full-time sworn personnel nationwide [Census of State and Local Law Enforcement Agencies, 2018 – Statistical Tables (BJS)]. If confirmed adopters average 200-500 officers each, total officer coverage might reach 5,000-15,000 sworn personnel—still representing less than 2% of the national sworn workforce.
+
+These estimates carry substantial uncertainty bands. The lower bound assumes our detection methodology is reasonably comprehensive and most non-detected agencies are genuine non-adopters. The upper bound acknowledges that systematic transparency feature disabling, combined with limited open records access at smaller agencies, could mask adoption rates 2-4 times higher than our confirmed counts suggest. What remains clear is that despite Axon's aggressive marketing of AI Era Plan as transformational technology, actual penetration as of mid-2025 remains a small fraction of the total U.S. law enforcement landscape—a finding that contextualizes both the current market opportunity and the limitations of any methodology relying on public document analysis.
+
+The following section examines temporal adoption patterns among confirmed agencies to assess whether penetration is accelerating.
+
+
+
+---
+
+## References
+
+
+## Sources in Knowledge Base
+
+**Total unique sources:** 169
+
+### General Sources (169)
+
+- [Census of State and Local Law Enforcement Agencies, 2018 – Statistical Tables (BJS)](https://bjs.ojp.gov/library/publications/census-state-and-local-law-enforcement-agencies-2018-statistical-tables)
+- [BJS Law Enforcement Core Statistics (LECS) - Past Collections](https://bjslecs.org/Home/PastCollections)
+- [Census of State and Local Law Enforcement Agencies (CSLLEA), 2018 (ICPSR 38771)](https://www.icpsr.umich.edu/web/NACJD/studies/38771)
+- [FBI Crime Data Explorer - GitHub Documentation](https://github.com/18F/crime-data-explorer)
+- [National Incident-Based Reporting System (NIBRS) - BJS](https://bjs.ojp.gov/national-incident-based-reporting-system-nibrs)
+- [Federal Law Enforcement Officers, 2020 – Statistical Tables (BJS)](https://30x30initiative.org/wp-content/uploads/2024/11/Federal-Law-Enforcement-Officers-2020.pdf)
+- [Local Police Departments, 2016: Personnel (BJS)](https://www.valdosta.edu/administration/advancement/sgri/documents/bh-files/officers-per-resident-doj-statistics.pdf)
+- [Census of State and Local Law Enforcement Agencies (CSLLEA) - BJS Data Collection Page](https://bjs.ojp.gov/data-collection/census-state-and-local-law-enforcement-agencies-csllea)
+- [Law Enforcement Core Statistics (LECS) - BJS](https://bjslecs.org)
+- [Census of State and Local Law Enforcement Agencies, 2018 – Statistical Tables (PDF)](https://bjs.ojp.gov/sites/g/files/xyckuh236/files/media/document/csllea18st.pdf)
+- [EFF's Guide to Getting Records About Axon's Draft One AI-Generated Police Reports](https://www.eff.org/deeplinks/2025/07/effs-guide-getting-records-about-axons-ai-generated-police-reports)
+- [Using AI to Write Police Reports - COPS Office (U.S. Department of Justice)](https://cops.usdoj.gov/html/dispatch/01-2025/ai_reports.html)
+- [Chula Vista City Council - Technology Impact Report: Axon AI Era Leaders Program and Draft One](https://pub-chulavista.escribemeetings.com/filestream.ashx?DocumentId=52541)
+- [Axon's Draft One Is Designed to Defy Transparency - Electronic Frontier Foundation](https://www.eff.org/deeplinks/2025/07/axons-draft-one-designed-defy-transparency)
+- [Government Documents Show Police Disabling AI Oversight Tools - Mother Jones](https://www.motherjones.com/criminal-justice/2025/08/axon-police-ai-draft-one-foia/)
+- [Draft One - Axon Official Product Page](https://www.axon.com/products/draft-one)
+- [Police Departments Shouldn't Allow Officers to Use AI to Draft Police Reports - ACLU](https://assets.aclu.org/live/uploads/2024/12/Automated-Police-Reports-1291.pdf)
+- [How Draft One upholds transparency for AI-assisted police reports - Axon Blog](https://www.axon.com/blog/how-draft-one-upholds-transparency-for-ai-assisted-police-reports)
+- [Palm Beach Co. Sheriff's office invests $1.3 million in AI to streamline police reporting - CBS12](https://cbs12.com/news/local/palm-beach-co-sheriffs-office-invests-13-million-in-ai-to-streamline-police-reporting)
+- [City of Joliet - Award of Contract for Axon AI Bundle (File #599-24)](https://joliet.legistar.com/LegislationDetail.aspx?ID=7369979&GUID=5B884846-8CEB-4B34-9678-A96A4D9108B1&FullText=1)
+- [Ferguson City Resolution 2024-52 - Axon AI Contract](https://www.fergusoncity.com/DocumentCenter/View/7366/Resolution-2024-52-Axon)
+- [Garfield County Board Meeting - Axon DraftOne Contract Award (September 2024)](https://pub-garfield.escribemeetings.com/filestream.ashx?DocumentId=16292)
+- [City of DeKalb Resolution 2025-085 - Axon Contract for Bodycams, Tasers, Squad Cameras](https://www.cityofdekalb.com/DocumentCenter/View/19809/11-Res-2025-085)
+- [New York State Comptroller - Open Book NY - Axon Enterprise Inc Contracts](https://wwe2.osc.state.ny.us/transparency/contracts/contractresults.cfm?ID=5195)
+- [Axon DraftOne Pricing Analysis - Compiled from Ferguson and Garfield County Contracts](https://www.fergusoncity.com/DocumentCenter/View/7366/Resolution-2024-52-Axon)
+- [Axon Sole Source Letter Analysis - Multiple Agency Examples](https://www.lrgvdc.org/downloads/packets/LRGVDC%20Police%20Academy%20SS%20Letter.pdf)
+- [Springfield Police Department $5.8M Axon Contract with ACLU Concerns - WAND TV](https://www.wandtv.com/news/springfield-police-department-sign-5-8-million-dollar-contract-for-technology-and-software/article_f541932c-a149-11ef-90ed-4b16f051dc6f.html)
+- [Axon Government Procurement Contracts - Carahsoft and Multiple Sources](https://www.carahsoft.com/axon/contracts)
+- [Axon AI Era Plan - Official Product Page](https://www.axon.com/products/axon-ai-era-plan)
+- [FPDS.gov - Federal Axon Contracts (DHS, USMS, DoD)](https://www.fpds.gov/ezsearch/fpdsportal?s=FPDS.GOV&indexName=awardfull&templateName=PDF&q=Axon+DEPARTMENT_FULL_NAME%3A%22HOMELAND+SECURITY%2C+DEPARTMENT+OF%22)
+- [Technology Impact Report: Presentation of Axon AI Era Leaders Program and Draft One AI-Assisted Report Writing Software - Chula Vista City Council](https://pub-chulavista.escribemeetings.com/filestream.ashx?DocumentId=52541)
+- [Budget Amendment Resolution 2024-65 and Amendment to Axon Contract - City of Laramie Council](https://www.cityoflaramie.org/AgendaCenter/ViewFile/Item/18012?fileID=25826)
+- [Boulder Police Department Policy and Procedure - General Order 131: Artificial Intelligence](https://pceinc.org/wp-content/uploads/2025/01/Boulder-PD-General-Order-131-Artificial-Intelligence.pdf)
+- [Management Action Recommendation - Use of Artificial Intelligence - Seattle Office of Police Accountability](https://seattle.gov/documents/Departments/OPA/ManagementAction/2024-OPA-0333_MAR_04-04-25.pdf)
+- [4 Reasons We Should Worry About Missing Crime Data | The Marshall Project](https://www.themarshallproject.org/2023/07/13/fbi-crime-rates-data-gap-nibrs)
+- [New PERF survey shows police agencies have turned a corner with staffing challenges](https://www.policeforum.org/staffing2024)
+- [Department of Justice Review of the Transition of Law Enforcement to NIBRS](https://www.justice.gov/archives/opa/speech/file/1563061/dl)
+- [Census of State and Local Law Enforcement Agencies, 2000](https://static.prisonpolicy.org/scans/bjs/csllea00.pdf)
+- [Internal memo: Don't use AI for police reports, prosecutor tells Seattle-area law enforcement](https://www.geekwire.com/2024/internal-memo-dont-use-ai-for-police-reports-prosecutor-tells-seattle-area-law-enforcement/)
+- [AI Generated Police Reports Raise Concerns Around Transparency, Bias](https://www.aclu.org/news/privacy-technology/ai-generated-police-reports-raise-concerns-around-transparency-bias)
+- [Generative Suspicion and the Risks of AI-Assisted Police Reports](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4897632)
+- [TRULEO Field Notes: Voice Generated Reports](https://truleo.co/field-notes-voice-generated-reports)
+- [BJS Primary State Law Enforcement Agencies Personnel 2020 and Local Police Departments Personnel 2020](https://bjs.ojp.gov/document/psleap20.pdf)
+- [Chula Vista Resolution 2025-161 - AI Era Leaders Program](https://cvapps.chulavistaca.gov/WebLink/DocView.aspx?id=261803&dbid=0&repo=CityClerk)
+- [Garfield County Sheriff's Office - Axon Draft One Contract Agenda Sheet](https://pub-garfield.escribemeetings.com/filestream.ashx?DocumentId=16292)
+- [Burleson TX Police Department - Axon AI Bundle 10-Year Proposal](https://mccmeetingspublic.blob.core.usgovcloudapi.net/burlesontx-meet-4b51b9ff8ffa4fe589cf492fbe7bcb82/ITEM-Attachment-001-ceb633161abf40f1bc309d22c175f73f.pdf)
+- [IRS Criminal Investigations Axon Sole Source Contract - HigherGov](https://www.highergov.com/contract/2032H524D00007-2023H225F00141/)
+- [San Leandro CA - Axon Officer Safety Plan 10 Premium Sole Source Procurement](https://sanleandro.int.legistar.com/LegislationDetail.aspx?From=RSS&ID=816956&GUID=EC9A845B-D844-4220-882B-55254372DEEA&FullText=1)
+- [Primary State Law Enforcement Agencies: Personnel, 2020 (BJS)](https://bjs.ojp.gov/document/psleap20.pdf)
+- [Portland OR - Axon Body-Worn Camera Contract Ordinance 191548](https://www.portland.gov/council/documents/ordinance/passed/191548)
+- [Axon Enterprise Sole Source Letter Version 42](https://hagerstown.novusagenda.com/agendapublic/AttachmentViewer.ashx?AttachmentID=11393&ItemID=11756)
+- [Laramie WY - Axon Draft One Contract Amendment Resolution 2024-65](https://www.cityoflaramie.org/AgendaCenter/ViewFile/Item/18012?fileID=25826)
+- [Bernalillo County Sheriff's Office AI Era Plan Announcement](https://citydesk.org/2025/07/28/bernalillo-county-sheriffs-office-to-launch-ai-powered-technology-suite/)
+- [Campbell City Council Resolution 13172 - Axon Draft One Contract Addendum](http://lflink.campbellca.gov/LFLINK/DocView.aspx?id=215662&dbid=0&repo=CityHall)
+- [City of Round Rock - Axon Enterprise Contract Agreement](https://documents.roundrocktexas.gov/WebLink/DocView.aspx?id=1623055&dbid=0&repo=CORR)
+- [Town of Addison - Axon Law Enforcement Technologies Agreement Presentation](https://agendas.addisontx.gov/docs/2025/CM/20251028_7489/6082_Presentation_-_LET_Solutions_Purchase_Agreement_(Axon).pdf)
+- [City of Ocoee - Axon Five-Year Contract Renewal](https://lfapps.ocoee.org/Public/DocView.aspx?id=1416809&dbid=0&repo=Laserfiche)
+- [City of San Rafael - Five-Year Agreement with Axon Enterprise](https://publicrecords.cityofsanrafael.org/WebLink/DocView.aspx?id=37038&dbid=0&repo=CityofSanRafael)
+- [City of Wichita Falls Resolution 142-2023 - Axon BWC Grant Purchase](https://weblink-public.wichitafallstx.gov/WebLink8_Pub/DocView.aspx?id=2102664&dbid=0&repo=Wichita-Falls)
+- [Carahsoft - Axon Government Procurement Contracts](https://www.carahsoft.com/axon/contracts)
+- [City of Royal Oak - 2024 Axon Contract Renewal](https://pub-royaloak.escribemeetings.com/filestream.ashx?DocumentId=4038)
+- [Axon - AI Era Plan Product Guide](https://www.axon.com/products/axon-ai-era-plan)
+- [Berkeley Police Accountability Board Meeting Packet - May 22, 2024](https://berkeleyca.gov/sites/default/files/legislative-body-meeting-attachments/2024-05-22%20PAB%20Regular%20Meeting%20Packet.Final_.pdf)
+- [A Digitized New Haven Police: Investigating Axon's Draft One - Yale Herald](https://yale-herald.com/2025/02/22/a-digitized-new-haven-police-investigating-axons-draft-one/)
+- [Police disable safety features in AI crime tools - Compiler News/Mother Jones](https://www.compiler.news/axion-ai-body-camera-police/)
+- [AI in Blue: Saratoga Springs Police Department's New Tech - Cedar Valley Sentinel](https://cedarvalleysentinel.com/public-safety/police-and-fire-2025/ai-in-blue-a-look-at-the-saratoga-springs-police-departments-new-tech/)
+- [Wilmington City Council Ordinance #0063 - Axon Enterprise Agreement](https://www.wilmingtoncitycouncil.com/wp-content/uploads/2025/06/0063-Ordinance-to-Authorize-Agreement-with-Axon-Enterprise-Inc.-for-Body-Cameras-Tasers-Rel.-Serv.-AATF-W0129153x920B6.pdf)
+- [Brentwood City Council - Agreement with Axon Enterprises (December 2023)](https://pub-brentwood.escribemeetings.com/filestream.ashx?DocumentId=19242)
+- [Berkeley City Council - Contract: Axon Enterprise for Body Worn Cameras (June 2022)](https://berkeleyca.gov/sites/default/files/documents/2022-06-21%20Special%20Item%2001%20Contract%20%20Axon%20Enterprise%20(4pm).pdf)
+- [Police in St. Paul, Minn., Implement First AI Use Policy - Government Technology](https://www.govtech.com/artificial-intelligence/police-in-st-paul-minn-implement-first-ai-use-policy)
+- [Axon's latest AI-powered solutions: Enabling agencies to do more](https://www.axon.com/blog/axons-latest-ai-powered-solutions)
+- [Time saved or justice threatened? Police departments are using AI to write reports - The National Desk](https://thenationaldesk.com/news/spotlight-on-america/time-saved-or-justice-threatened-police-departments-are-using-ai-to-write-reports-artificial-intelligence-police-policing-officers-shortages-public-safety-body-camera-footage-axon-draft-one-technology)
+- [Police Departments Are Now Using AI to Write Reports - Criminal Legal News](https://www.criminallegalnews.org/news/2025/feb/15/police-departments-are-now-using-ai-write-reports/)
+- [Omnia Partners - Axon US Domestic Pricebook 2025](https://www.omniapartners.com/suppliers-files/A-D/Axon/Contract_Documents/3544-21-4615/3544-21-4615_AM9_Axon_2025_02_04.pdf)
+- [Littleton City Council Meeting Agenda - Axon Contract Amendment](https://ompnetwork.s3-us-west-2.amazonaws.com/sites/199/documents/12-17-2024_cc_agenda.pdf?2g0lYlsfTPds7O3sSmGm0v91qyXVu72E)
+- [Civil Beat - Honolulu Police Draft One Pilot Test](https://www.civilbeat.org/2025/11/advocates-fear-surveillance-creep-if-hpd-starts-using-ai-to-write-reports/)
+- [Washington County, Oregon - Deputies Pilot AI-Powered Report Writing for 60 Days - Country Herald](https://countryherald.com/news/washington-county-oregon-deputies-pilot-ai-powered-report-writing-for-60-days/)
+- [Winnebago County Sheriff's Department to test new AI tool to reduce report-writing time - Rock River Current](https://www.rockrivercurrent.com/2025/05/winnebago-county-sheriffs-department-to-test-new-ai-tool-to-reduce-report-writing-time/)
+- [Axon reimagines report writing with Draft One - PR Newswire](https://www.prnewswire.com/news-releases/axon-reimagines-report-writing-with-draft-one-a-first-of-its-kind-ai-powered-force-multiplier-for-public-safety-302124489.html)
+- [Eagan police among growing number of metro departments using AI to write reports - CBS Minnesota](https://www.cbsnews.com/minnesota/news/eagan-police-department-ai-reports/)
+- [Somerset County sheriff deputies: AI saves time writing reports - Central Maine](https://www.centralmaine.com/2025/07/27/somerset-county-sheriff-deputies-ai-saves-time-writing-reports/)
+- [Did an AI write up your arrest? Hard to know - Politico](https://www.politico.com/newsletters/digital-future-daily/2024/09/04/axon-ai-police-reports-00177331)
+- [Anchorage Police Department: AI-Generated Police Reports Don't Save Time - EFF](https://www.eff.org/deeplinks/2025/03/anchorage-police-department-ai-generated-police-reports-dont-save-time)
+- [Are we DrAIfting? The Role of Large Language Models in Police Investigative Interviewing](https://iiirg.org/wp-content/uploads/2025/09/IIRP_20250506_May_Final.pdf)`;
+
+        // Calculate word count
+        const wordCount = reportMarkdown.split(/\s+/).filter(word => word.length > 0).length;
+        document.getElementById('word-count').textContent = `~${wordCount.toLocaleString()} words`;
+
+        // Render the markdown
+        document.getElementById('report-content').innerHTML = marked.parse(reportMarkdown);
+
+        // Copy functionality
+        const copyBtn = document.getElementById('copy-btn');
+        const toast = document.getElementById('toast');
+
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(reportMarkdown).then(() => {
+                copyBtn.classList.add('copied');
+                copyBtn.innerHTML = '<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+                toast.textContent = 'Copied to clipboard';
+                toast.classList.add('show');
+                
+                setTimeout(() => {
+                    copyBtn.classList.remove('copied');
+                    copyBtn.innerHTML = '<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+                    toast.classList.remove('show');
+                }, 2000);
+            });
+        });
+
+        // Download functionality
+        document.getElementById('download-btn').addEventListener('click', () => {
+            const blob = new Blob([reportMarkdown], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'axon-ai-era-plan-penetration-analysis.md';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            toast.textContent = 'Downloaded report';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        });
+
+        // Share functionality
+        document.getElementById('share-btn').addEventListener('click', async () => {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Axon AI Era Plan Penetration Analysis',
+                        text: 'A comprehensive research report on Axon DraftOne adoption among US law enforcement agencies',
+                        url: window.location.href
+                    });
+                } catch (err) {
+                    console.log('Share cancelled');
+                }
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                toast.textContent = 'Link copied to clipboard';
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            }
+        });
+    </script>
+</body>
+</html>

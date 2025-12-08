@@ -20,7 +20,10 @@ venv/
 # Reports and logs
 reports/
 *.log
-*.md
+
+# Ignore generated markdown reports (but not README)
+final.md
+!README.md
 
 # Checkpoints and generated data
 checkpoints/
