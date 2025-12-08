@@ -8,7 +8,7 @@ The Worker Agent:
 4. Saves valuable findings to the knowledge base
 """
 import os
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 from textwrap import dedent
 
 import litellm
@@ -119,6 +119,17 @@ def _build_worker_instructions(worker_id: str, subtask: Subtask, has_extract: bo
     search_method = "search_academic" if subtask.search_type == "academic" else "search_general"
     alt_method = "search_general" if subtask.search_type == "academic" else "search_academic"
     
+    # Get search strategy (default to general_web if not specified)
+    search_strategy = getattr(subtask, 'search_strategy', 'general_web')
+    dork_pattern = getattr(subtask, 'dork_pattern', None)
+    target_state = getattr(subtask, 'target_state', None)
+    target_agencies = getattr(subtask, 'target_agencies', [])
+    
+    # Build strategy-specific search instructions
+    search_instructions = _build_search_strategy_instructions(
+        subtask, search_strategy, dork_pattern, target_state, target_agencies, search_method, alt_method
+    )
+    
     # Build extraction instructions if available
     if has_extract:
         extraction_instructions = """
@@ -151,6 +162,30 @@ def _build_worker_instructions(worker_id: str, subtask: Subtask, has_extract: bo
             URL extraction tools are not available. Extract as much as possible from search snippets.
             """
     
+    # Build AI disclaimer detection instructions for relevant strategies
+    disclaimer_instructions = ""
+    if search_strategy in ['dork_police_reports', 'dork_government', 'open_data_portal']:
+        disclaimer_instructions = """
+            ## CRITICAL: AI Disclaimer Detection
+            
+            For police reports and government documents, look for AI/DraftOne disclaimers:
+            
+            **Patterns to detect:**
+            - "Axon DraftOne"
+            - "Draft One"
+            - "AI-assisted report"
+            - "AI-generated draft"
+            - "drafted using AI"
+            - "prepared with assistance from AI"
+            - "officer is responsible for verifying accuracy"
+            
+            **When you find a disclaimer:**
+            1. Note the EXACT disclaimer text in your finding
+            2. Note the agency name clearly
+            3. Set verified=true if you can confirm the source
+            4. Mark as high-quality finding (this is PRIMARY evidence!)
+            """
+    
     return [
         dedent(f"""
             You are Research Worker {worker_id}, a meticulous research assistant conducting
@@ -159,19 +194,8 @@ def _build_worker_instructions(worker_id: str, subtask: Subtask, has_extract: bo
             ## Your Mission
             Execute deep research on subtask #{subtask.id}: `{subtask.query}`
             
-            ## PHASE 1: Search for Sources
-            
-            Use multiple search queries to find sources:
-            
-            1. **Primary Search**: Use `{search_method}` with: "{subtask.query}"
-            
-            2. **Alternative Queries** (if primary yields <5 results):
-               - Rephrase using synonyms
-               - Add "2024" or "latest" for recency
-               - Add "survey" or "review" for overview sources
-               - Try `{alt_method}` for different source types
-            
-            Collect URLs from search results for deep extraction.
+            {search_instructions}
+            {disclaimer_instructions}
             {extraction_instructions}
             
             ## PHASE 3: Save Comprehensive Findings
@@ -191,6 +215,13 @@ def _build_worker_instructions(worker_id: str, subtask: Subtask, has_extract: bo
             8. **Limitations mentioned** - Any caveats or constraints noted
             9. **Technical specifications** - Architecture details, parameters
             10. **Results and outcomes** - What happened, what was achieved
+            
+            **For adoption research, ALWAYS include:**
+            - Agency name (exact official name)
+            - State (2-letter code)
+            - Any AI disclaimer text (verbatim if possible)
+            - Dates of adoption/deployment
+            - Number of officers/users if mentioned
             
             **IMPORTANT**: Each finding should be 1000-3000 characters (150-500 words).
             With full URL extraction, you have access to complete article content.
@@ -215,9 +246,9 @@ def _build_worker_instructions(worker_id: str, subtask: Subtask, has_extract: bo
             ## Quality Scoring
             
             Before saving, rate source quality (don't save <3):
-            - 5: Peer-reviewed paper, official documentation
-            - 4: Major tech company blog, institutional report
-            - 3: Reputable news outlet, expert blog
+            - 5: Peer-reviewed paper, official documentation, police reports with disclaimers
+            - 4: Major tech company blog, institutional report, procurement documents
+            - 3: Reputable news outlet, expert blog, council meeting minutes
             - 2: Forum posts, opinion pieces
             - 1: Unknown sources, marketing material
             
@@ -230,12 +261,15 @@ def _build_worker_instructions(worker_id: str, subtask: Subtask, has_extract: bo
             **URLs Extracted**: [count]
             **Findings Saved**: [count]
             **Total Content**: [approximate word count]
-            **Source Types**: [academic/industry/news breakdown]
+            **Source Types**: [academic/industry/news/government breakdown]
             
             **Key Discoveries**:
             1. [Most important finding with detail]
             2. [Second most important]
             3. [Third most important]
+            
+            **Agencies Found** (for adoption research):
+            - [Agency Name, State]: [status - confirmed/probable/pilot]
             
             **Gaps Identified**:
             - [What couldn't be found]
@@ -245,6 +279,211 @@ def _build_worker_instructions(worker_id: str, subtask: Subtask, has_extract: bo
             ```
         """).strip(),
     ]
+
+
+def _build_search_strategy_instructions(
+    subtask: Subtask,
+    search_strategy: str,
+    dork_pattern: Optional[str],
+    target_state: Optional[str],
+    target_agencies: List[str],
+    search_method: str,
+    alt_method: str,
+) -> str:
+    """Build search instructions based on the search strategy"""
+    
+    # Base search instructions
+    base_instructions = f"""
+## PHASE 1: Search for Sources
+
+Use multiple search queries to find sources:
+
+1. **Primary Search**: Use `{search_method}` with: "{subtask.query}"
+
+2. **Alternative Queries** (if primary yields <5 results):
+   - Rephrase using synonyms
+   - Add "2024" or "latest" for recency
+   - Add "survey" or "review" for overview sources
+   - Try `{alt_method}` for different source types
+
+Collect URLs from search results for deep extraction.
+"""
+    
+    # Strategy-specific instructions
+    if search_strategy == 'dork_police_reports':
+        dork = dork_pattern or 'site:.gov "Axon DraftOne" OR "AI-assisted report" police'
+        return f"""
+## PHASE 1: Dork Search for Police Reports
+
+**Search Strategy: Police Reports with AI Disclaimers**
+
+Use Google dork patterns to find police incident reports containing AI disclaimers.
+
+**Primary Dork Pattern:**
+```
+{dork}
+```
+
+**Additional Search Queries:**
+1. `{search_method}` with: `site:.gov "DraftOne" incident report`
+2. `{search_method}` with: `filetype:pdf police report "drafted using AI"`
+3. `{search_method}` with: `"officer is responsible for verifying" AI report`
+{f'4. Focus on: {target_state} state agencies' if target_state else ''}
+
+**What to Look For:**
+- Police incident/arrest reports
+- AI disclaimer text in headers or footers
+- Specific mentions of "Axon DraftOne" or "Draft One"
+- Officer attestation language about AI-generated content
+
+Collect URLs and extract FULL document content.
+"""
+    
+    elif search_strategy == 'dork_procurement':
+        dork = dork_pattern or 'site:.gov "Axon AI Era Plan" contract OR procurement'
+        return f"""
+## PHASE 1: Dork Search for Procurement Documents
+
+**Search Strategy: Procurement/Contract Documents**
+
+Use Google dork patterns to find government procurement documents.
+
+**Primary Dork Pattern:**
+```
+{dork}
+```
+
+**Additional Search Queries:**
+1. `{search_method}` with: `site:bidnet.com OR site:govwin.com "Axon DraftOne"`
+2. `{search_method}` with: `filetype:pdf "purchase order" "Axon" "AI Era Plan"`
+3. `{search_method}` with: `"sole source justification" Axon AI`
+{f'4. Focus on: {target_state} state procurement portals' if target_state else ''}
+
+**What to Look For:**
+- RFPs (Requests for Proposal) mentioning Axon AI
+- Contract award notices
+- Purchase orders for AI Era Plan
+- Sole source justification documents
+- Budget line items for AI report writing
+
+Extract contract values, dates, and agency names.
+"""
+    
+    elif search_strategy == 'dork_council_minutes':
+        dork = dork_pattern or 'site:.gov "city council" OR "board" "Axon DraftOne"'
+        return f"""
+## PHASE 1: Dork Search for Council/Board Minutes
+
+**Search Strategy: Council and Board Meeting Records**
+
+Use Google dork patterns to find government meeting minutes and agendas.
+
+**Primary Dork Pattern:**
+```
+{dork}
+```
+
+**Additional Search Queries:**
+1. `{search_method}` with: `"city council" "police" "Axon AI" minutes`
+2. `{search_method}` with: `"board of supervisors" "DraftOne" approval`
+3. `{search_method}` with: `filetype:pdf "council agenda" "AI report writing" police`
+{f'4. Focus on: {target_state} city/county councils' if target_state else ''}
+
+**What to Look For:**
+- Budget approval discussions
+- Technology procurement agenda items
+- Police department presentations on AI tools
+- Public comments about AI in policing
+- Vote records on Axon contracts
+
+Note adoption dates, council approval status, and any concerns raised.
+"""
+    
+    elif search_strategy == 'dork_news':
+        dork = dork_pattern or '"police" "Axon DraftOne" OR "AI Era Plan" deployment'
+        return f"""
+## PHASE 1: Dork Search for News Coverage
+
+**Search Strategy: News Articles and Press Coverage**
+
+Search for news coverage of AI adoption in law enforcement.
+
+**Primary Dork Pattern:**
+```
+{dork}
+```
+
+**Additional Search Queries:**
+1. `{search_method}` with: `"police department" "adopts" "Axon AI"`
+2. `{search_method}` with: `site:patch.com OR site:localnews "DraftOne" police`
+3. `{search_method}` with: `"sheriff's office" "AI-powered report writing" Axon`
+{f'4. Focus on: {target_state} local news outlets' if target_state else ''}
+
+**What to Look For:**
+- Press releases from police departments
+- Local news coverage of AI adoption
+- Quotes from chiefs/sheriffs about AI tools
+- Community reaction to AI in policing
+- Timeline of rollouts and pilots
+
+Note quoted officials, deployment dates, and any criticism.
+"""
+    
+    elif search_strategy == 'dork_government':
+        dork = dork_pattern or 'site:.gov "Axon" "artificial intelligence" police'
+        return f"""
+## PHASE 1: Dork Search for Government Sites
+
+**Search Strategy: Government Website Content**
+
+Search specifically within .gov domains for official information.
+
+**Primary Dork Pattern:**
+```
+{dork}
+```
+
+**Additional Search Queries:**
+1. `{search_method}` with: `site:police.gov "DraftOne" OR "AI Era Plan"`
+2. `{search_method}` with: `site:state.{target_state.lower() if target_state else '*'}.us "Axon AI"`
+3. `{search_method}` with: `site:.gov filetype:pdf "policy" "AI-assisted" report writing`
+
+**What to Look For:**
+- Official department policies on AI use
+- Published use policies for DraftOne
+- Transparency reports mentioning AI
+- Training materials or guides
+
+Extract policy details and official positions.
+"""
+    
+    elif target_state or target_agencies:
+        # Geographic/entity-focused search
+        agencies_str = ", ".join(target_agencies[:5]) if target_agencies else "major agencies"
+        return f"""
+## PHASE 1: Targeted Geographic Search
+
+**Search Strategy: State/Agency Focused Research**
+
+{f'**Target State:** {target_state}' if target_state else ''}
+{f'**Target Agencies:** {agencies_str}' if target_agencies else ''}
+
+**Primary Search Queries:**
+1. `{search_method}` with: "{subtask.query}"
+2. `{search_method}` with: `"{target_state or 'state'}" police "Axon DraftOne" adoption`
+{f'3. Search each target agency: ' + ", ".join([f'"{a}" Axon AI' for a in target_agencies[:3]]) if target_agencies else ''}
+
+**State-Specific Sources to Check:**
+- State police/highway patrol websites
+- Major city police department announcements
+- State procurement portal
+- Local news coverage
+
+Collect URLs and agency-specific information.
+"""
+    
+    else:
+        return base_instructions
 
 
 # =============================================================================

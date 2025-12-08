@@ -50,7 +50,8 @@ from agents.worker import WorkerAgent
 from agents.editor import EditorAgent
 from agents.critic import CriticAgent
 from agents.domain_experts import create_expert_panel, get_multi_perspective_analysis
-from agents.schemas import CriticEvaluation, ResearchIteration, ResearchCheckpoint
+from agents.schemas import CriticEvaluation, ResearchIteration, ResearchCheckpoint, PenetrationMetrics
+from agents.analyst import DataAnalystAgent
 from infrastructure.perplexity_tools import PerplexitySearchTools
 from infrastructure.knowledge_tools import KnowledgeTools
 from infrastructure.retry_utils import with_retry
@@ -765,10 +766,12 @@ class DeepResearchSwarm:
         self._worker: Optional[WorkerAgent] = None
         self._editor: Optional[EditorAgent] = None
         self._critic: Optional[CriticAgent] = None
+        self._analyst: Optional[DataAnalystAgent] = None
         
         # Session tracking
         self.iterations: List[Dict[str, Any]] = []
         self.all_findings: List[Dict[str, Any]] = []
+        self.penetration_metrics: Optional[PenetrationMetrics] = None
     
     @property
     def hitl_agent(self) -> Optional["HitlAgent"]:
@@ -829,6 +832,17 @@ class DeepResearchSwarm:
                 hitl_agent=self.hitl_agent,
             )
         return self._critic
+    
+    @property
+    def analyst(self) -> DataAnalystAgent:
+        """Lazy init analyst for structured data extraction"""
+        if self._analyst is None:
+            self._analyst = DataAnalystAgent(
+                model_id=config.models.critic,  # Use same model as critic for consistency
+                temperature=0.2,  # Low for consistent extraction
+                knowledge_tools=self.knowledge_tools,
+            )
+        return self._analyst
     
     @observe(name="swarm.deep_research")
     def deep_research(
@@ -958,13 +972,56 @@ class DeepResearchSwarm:
                 except Exception as e:
                     logger.warning(f"Expert analysis failed: {e}")
             
+            # Phase 3.5: Structured Data Analysis (for market/adoption research)
+            structured_analysis = None
+            if self._is_adoption_research(query) and len(self.all_findings) > 0:
+                logger.info("\n" + "=" * 60)
+                logger.info("PHASE 3.5: STRUCTURED DATA ANALYSIS")
+                logger.info("=" * 60)
+                
+                try:
+                    # Structure findings into adoption records
+                    logger.info("Extracting structured adoption data from findings...")
+                    adoption_records = self.analyst.structure_findings(self.all_findings)
+                    
+                    # Compute penetration metrics
+                    self.penetration_metrics = self.analyst.compute_penetration()
+                    
+                    logger.info(f"Processed {len(adoption_records)} agency records")
+                    logger.info(f"Confirmed adoptions: {self.penetration_metrics.confirmed_count}")
+                    logger.info(f"Probable adoptions: {self.penetration_metrics.probable_count}")
+                    logger.info(f"Penetration rate: {self.penetration_metrics.penetration_confirmed_plus_probable:.1f}%")
+                    
+                    # Generate structured analysis summary for the report
+                    structured_analysis = self.analyst.generate_summary_report()
+                    
+                    # Export to CSV for detailed analysis
+                    try:
+                        csv_path = self.analyst.export_to_csv()
+                        logger.info(f"Exported adoption data to: {csv_path}")
+                    except Exception as e:
+                        logger.warning(f"CSV export failed: {e}")
+                    
+                    if save_checkpoint:
+                        self._save_checkpoint("structured_analysis", {
+                            "total_agencies": self.penetration_metrics.total_agencies,
+                            "confirmed": self.penetration_metrics.confirmed_count,
+                            "probable": self.penetration_metrics.probable_count,
+                            "penetration_pct": self.penetration_metrics.penetration_confirmed_plus_probable,
+                        })
+                        
+                except Exception as e:
+                    logger.warning(f"Structured analysis failed: {e}")
+                    import traceback
+                    traceback.print_exc()
+            
             # Phase 4: Final Synthesis
             logger.info("\n" + "=" * 60)
             logger.info("PHASE 4: REPORT SYNTHESIS")
             logger.info("=" * 60)
             
             # Build context for editor
-            synthesis_context = self._build_synthesis_context(expert_insights)
+            synthesis_context = self._build_synthesis_context(expert_insights, structured_analysis)
             
             try:
                 logger.info(f"Calling editor synthesis with {len(self.all_findings)} findings...")
@@ -1111,17 +1168,64 @@ class DeepResearchSwarm:
         
         return followup_subtasks
     
-    def _build_synthesis_context(self, expert_insights: List[Dict]) -> Optional[str]:
+    def _is_adoption_research(self, query: str) -> bool:
+        """
+        Detect if the query is about market adoption, penetration, or entity-specific research.
+        
+        Returns True if the query appears to be about:
+        - Product/service adoption rates
+        - Market penetration analysis
+        - Geographic deployment tracking
+        - Entity-specific usage tracking (agencies, companies, etc.)
+        """
+        query_lower = query.lower()
+        
+        adoption_keywords = [
+            "adoption", "penetration", "market share", "deployment",
+            "agencies", "departments", "police", "law enforcement",
+            "how many", "percentage", "proportion", "estimate",
+            "using", "adopted", "deployed", "implemented",
+            "axon", "draftone", "ai era plan",
+        ]
+        
+        # Check for adoption-related keywords
+        keyword_count = sum(1 for kw in adoption_keywords if kw in query_lower)
+        
+        # Strong indicators
+        strong_indicators = [
+            "penetration" in query_lower,
+            "adoption" in query_lower and "rate" in query_lower,
+            "how many" in query_lower and "agencies" in query_lower,
+            "axon" in query_lower and ("draftone" in query_lower or "ai era" in query_lower),
+            "law enforcement" in query_lower and "ai" in query_lower,
+        ]
+        
+        return keyword_count >= 3 or any(strong_indicators)
+    
+    def _build_synthesis_context(
+        self,
+        expert_insights: List[Dict],
+        structured_analysis: Optional[str] = None,
+    ) -> Optional[str]:
         """
         Build synthesis context using findings index for tool-based discovery.
         
         Instead of dumping all findings, we provide:
         1. A compact findings index (statistics, sources, topics)
         2. Expert insights if available
+        3. Structured analysis (penetration metrics) if available
         
         The Editor will then use search_knowledge() to retrieve detailed findings.
         """
         parts = []
+        
+        # Add structured analysis at the top if available (for adoption research)
+        if structured_analysis:
+            parts.append("## Structured Adoption Analysis\n")
+            parts.append(structured_analysis)
+            parts.append("")
+            parts.append("---")
+            parts.append("")
         
         # Prefer in-memory findings (from current session) to avoid empty KB responses
         if self.all_findings:

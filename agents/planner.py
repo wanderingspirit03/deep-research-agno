@@ -12,6 +12,7 @@ from typing import List, Optional
 from textwrap import dedent
 
 from pydantic import BaseModel, Field
+from typing import Optional
 
 import litellm
 litellm.drop_params = True  # Required for isara proxy
@@ -37,6 +38,32 @@ class Subtask(BaseModel):
         default="general",
         description="Search type: 'academic' for papers/research, 'general' for web/news"
     )
+    search_strategy: str = Field(
+        default="general_web",
+        description="""Search strategy to use:
+        - 'general_web': Standard web search
+        - 'academic': Scholarly/academic sources
+        - 'dork_police_reports': Google dork for police reports with AI disclaimers
+        - 'dork_procurement': Google dork for procurement/contract documents
+        - 'dork_council_minutes': Google dork for council/board meeting minutes
+        - 'dork_news': Google dork for news coverage
+        - 'dork_government': Google dork for .gov sites
+        - 'procurement_portal': Direct procurement portal search
+        - 'open_data_portal': Public records/open data search
+        """
+    )
+    dork_pattern: Optional[str] = Field(
+        default=None,
+        description="Google dork pattern if search_strategy is a dork type (e.g., 'site:.gov \"Axon DraftOne\"')"
+    )
+    target_state: Optional[str] = Field(
+        default=None,
+        description="Target US state code for geographic decomposition (e.g., 'CA', 'TX')"
+    )
+    target_agencies: List[str] = Field(
+        default_factory=list,
+        description="Specific agencies to focus on in this subtask"
+    )
     priority: int = Field(
         default=1,
         description="Priority 1-3 (1=highest, 3=lowest)"
@@ -51,6 +78,14 @@ class ResearchPlan(BaseModel):
     estimated_depth: str = Field(
         default="medium",
         description="Research depth: 'shallow', 'medium', or 'deep'"
+    )
+    geographic_scope: Optional[str] = Field(
+        default=None,
+        description="Geographic scope (e.g., 'US nationwide', 'California', 'Top 50 agencies')"
+    )
+    decomposition_strategy: Optional[str] = Field(
+        default=None,
+        description="How the research was decomposed (e.g., 'by_state', 'by_agency_type', 'by_evidence_type')"
     )
 
 
@@ -134,6 +169,75 @@ class PlannerAgent:
                 Think like a PhD researcher planning a literature review. Your plan should
                 enable thorough understanding from foundations to cutting-edge developments.
                 
+                ## CRITICAL: Exhaustive Geographic/Entity Decomposition
+                
+                For market research, adoption studies, or geographic analysis:
+                
+                **DECOMPOSE LARGE SCOPES INTO SPECIFIC, MANAGEABLE CHUNKS.**
+                
+                Examples:
+                - "US law enforcement" → Break into subtasks by state or top agencies
+                - "Fortune 500 companies" → Break by industry or top 50 companies
+                - "University adoption" → Break by region or top research universities
+                
+                **Create MANY focused subtasks** rather than few broad ones.
+                For nationwide US research, consider:
+                - Top 10 agencies by officer count (NYPD, LAPD, CPD, etc.)
+                - Regional breakdown (Northeast, Southeast, Midwest, West)
+                - State-specific searches for high-population states (CA, TX, FL, NY)
+                
+                ## Google Dorks for Targeted Research
+                
+                Use **Google Dorks** (advanced search operators) to find specific document types:
+                
+                ### Dork Patterns for Law Enforcement Research:
+                
+                **Police Reports with AI Disclaimers:**
+                ```
+                site:.gov "Axon DraftOne" OR "AI-assisted report" OR "AI-generated"
+                site:police.gov "drafted using AI" OR "DraftOne"
+                filetype:pdf "incident report" "Axon" "AI" 
+                ```
+                
+                **Procurement Documents:**
+                ```
+                site:.gov "Axon AI Era Plan" contract OR procurement OR RFP
+                site:bidnet.com OR site:govwin.com "Axon DraftOne"
+                filetype:pdf "purchase order" "Axon" "AI Era"
+                ```
+                
+                **Council/Board Minutes:**
+                ```
+                site:.gov "city council" OR "board of supervisors" "Axon DraftOne"
+                site:.gov "meeting minutes" "AI report writing" police
+                filetype:pdf "council agenda" "Axon AI"
+                ```
+                
+                **News Coverage:**
+                ```
+                site:localnews.com OR site:patch.com "police" "Axon DraftOne"
+                "police department" "adopts" "Axon AI" OR "DraftOne"
+                ```
+                
+                **Government Sites:**
+                ```
+                site:.gov "Axon" "artificial intelligence" police
+                site:state.gov OR site:city.gov "DraftOne" OR "AI Era Plan"
+                ```
+                
+                ### Search Strategy Selection:
+                
+                Set `search_strategy` to one of:
+                - `general_web`: Standard web search
+                - `academic`: Scholarly sources
+                - `dork_police_reports`: Use dork for police reports
+                - `dork_procurement`: Use dork for procurement docs
+                - `dork_council_minutes`: Use dork for meeting minutes
+                - `dork_news`: Use dork for news coverage
+                - `dork_government`: Use dork for .gov sites
+                
+                When using dork strategies, set `dork_pattern` with the specific pattern.
+                
                 ## Four-Phase Research Structure
                 
                 Organize subtasks into four research phases:
@@ -168,6 +272,9 @@ class PlannerAgent:
                 - Clear, specific focus area
                 - Search-engine optimized query (7-15 words)
                 - Search type: 'academic' for papers/research, 'general' for industry/news
+                - Search strategy: Choose from dork types for specific document hunting
+                - Dork pattern: If using dork strategy, provide the exact pattern
+                - Target state/agencies: For geographic decomposition
                 - Priority: 1 (essential), 2 (important), 3 (supplementary)
                 
                 ## Quality Guidelines
@@ -178,6 +285,8 @@ class PlannerAgent:
                 - Ensure subtasks are mutually exclusive but collectively exhaustive
                 - Include at least one subtask for limitations/challenges
                 - Include at least one subtask for future directions
+                - **For market/adoption research**: Include geographic decomposition
+                - **Use dork strategies** when searching for specific document types
                 
                 ## Query Optimization Tips
                 
@@ -185,6 +294,8 @@ class PlannerAgent:
                 - Include year qualifiers for recent work (e.g., "2024")
                 - Add context words ("survey", "benchmark", "limitations")
                 - Avoid overly broad queries
+                - For entity-specific research, name the entities explicitly
+                - Use quotes for exact phrase matching
             """).strip(),
         ]
     

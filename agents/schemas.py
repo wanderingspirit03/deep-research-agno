@@ -6,6 +6,7 @@ Provides structured models for:
 - Quality-scored findings with source metadata
 - Critic evaluations with gap analysis
 - Research iteration tracking
+- Agency adoption tracking (for market penetration research)
 """
 from typing import List, Optional, Dict, Any
 from datetime import datetime
@@ -25,6 +26,52 @@ class ResearchPhase(str, Enum):
     CRITICAL = "critical"          # Critical analysis, comparisons
     FUTURE = "future"              # Future directions, predictions
     SYNTHESIS = "synthesis"        # Integration and conclusions
+
+
+class AdoptionStatus(str, Enum):
+    """Adoption status labels for agency/entity tracking"""
+    CONFIRMED = "confirmed"              # Clear, unambiguous evidence of active use
+    PROBABLE = "probable"                # Strong evidence but not explicitly confirmed
+    PILOT = "pilot"                      # Piloting or trialing (limited deployment)
+    NOT_ADOPTED = "not_adopted"          # Searched and no evidence found
+    NO_DATA = "no_data"                  # Insufficient public records to determine
+
+
+class SearchStrategy(str, Enum):
+    """Search strategy types for targeted research"""
+    GENERAL_WEB = "general_web"                    # Standard web search
+    ACADEMIC = "academic"                          # Academic/scholarly sources
+    DORK_POLICE_REPORTS = "dork_police_reports"    # Google dork for police reports with disclaimers
+    DORK_PROCUREMENT = "dork_procurement"          # Google dork for procurement portals
+    DORK_COUNCIL_MINUTES = "dork_council_minutes"  # Google dork for council/board minutes
+    DORK_NEWS = "dork_news"                        # Google dork for news coverage
+    DORK_GOVERNMENT = "dork_government"            # Google dork for .gov sites
+    PROCUREMENT_PORTAL = "procurement_portal"      # Direct procurement portal search
+    OPEN_DATA_PORTAL = "open_data_portal"          # Public records/open data portals
+    PRESS_RELEASE = "press_release"                # Official press releases
+
+
+class AgencyType(str, Enum):
+    """Types of law enforcement agencies"""
+    MUNICIPAL_POLICE = "Municipal Police"
+    COUNTY_SHERIFF = "County Sheriff"
+    STATE_POLICE = "State Police"
+    HIGHWAY_PATROL = "Highway Patrol"
+    FEDERAL = "Federal"
+    OTHER = "Other"
+
+
+class EvidenceSourceType(str, Enum):
+    """Types of evidence sources for adoption detection"""
+    POLICE_REPORT = "police_report"              # Incident/arrest reports with disclaimers
+    PROCUREMENT_CONTRACT = "procurement_contract"  # RFPs, contracts, purchase orders
+    COUNCIL_MINUTES = "council_minutes"           # Council/board meeting minutes
+    BUDGET_DOCUMENT = "budget_document"           # Budget presentations, fiscal documents
+    PRESS_RELEASE = "press_release"               # Official announcements
+    NEWS_ARTICLE = "news_article"                 # Local/national news coverage
+    POLICY_MEMO = "policy_memo"                   # Internal policies made public
+    AXON_ANNOUNCEMENT = "axon_announcement"       # Axon's own press releases
+    OTHER = "other"
 
 
 class SearchType(str, Enum):
@@ -48,6 +95,164 @@ class SourceAuthority(str, Enum):
 
 
 # =============================================================================
+# Agency Adoption Schema (for market penetration research)
+# =============================================================================
+
+class AdoptionEvidence(BaseModel):
+    """Evidence supporting agency adoption status"""
+    evidence_type: EvidenceSourceType = Field(
+        default=EvidenceSourceType.OTHER,
+        description="Type of evidence source"
+    )
+    url: str = Field(default="", description="URL of evidence source")
+    title: str = Field(default="", description="Title/description of evidence")
+    excerpt: str = Field(default="", description="Relevant excerpt from source")
+    date_found: Optional[str] = Field(default=None, description="Date the evidence was found/published")
+    confidence_score: float = Field(
+        default=0.5,
+        ge=0.0,
+        le=1.0,
+        description="Confidence in this evidence (0-1)"
+    )
+    
+    # Specific fields for police reports
+    has_ai_disclaimer: bool = Field(default=False, description="Contains AI/DraftOne disclaimer")
+    disclaimer_text: Optional[str] = Field(default=None, description="Exact disclaimer text if found")
+
+
+class AgencyAdoption(BaseModel):
+    """
+    Structured record for tracking agency adoption of a product/service.
+    
+    Designed for tracking Axon AI Era Plan / DraftOne adoption but can be
+    generalized to other market penetration research.
+    """
+    # Agency identification
+    agency_name: str = Field(..., description="Full name of the agency")
+    state: str = Field(..., description="US state code (e.g., 'CA', 'TX')")
+    agency_type: AgencyType = Field(
+        default=AgencyType.MUNICIPAL_POLICE,
+        description="Type of law enforcement agency"
+    )
+    
+    # Demographics
+    officer_count: Optional[int] = Field(
+        default=None,
+        description="Number of sworn officers (active duty)"
+    )
+    population_served: Optional[int] = Field(
+        default=None,
+        description="Population served by the agency"
+    )
+    
+    # Adoption status
+    status: AdoptionStatus = Field(
+        default=AdoptionStatus.NO_DATA,
+        description="Current adoption status"
+    )
+    status_confidence: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+        description="Confidence in the status determination (0-1)"
+    )
+    
+    # Evidence collection
+    evidence: List[AdoptionEvidence] = Field(
+        default_factory=list,
+        description="Supporting evidence for the status"
+    )
+    evidence_count: int = Field(default=0, description="Number of evidence sources found")
+    
+    # Timeline tracking
+    first_adoption_date: Optional[str] = Field(
+        default=None,
+        description="Earliest date of adoption evidence (ISO format)"
+    )
+    last_verified_date: Optional[str] = Field(
+        default=None,
+        description="Most recent verification date (ISO format)"
+    )
+    
+    # Research metadata
+    search_completed: bool = Field(default=False, description="Whether comprehensive search was performed")
+    data_access_notes: Optional[str] = Field(
+        default=None,
+        description="Notes about data availability (e.g., 'no open data portal')"
+    )
+    
+    def add_evidence(self, evidence: AdoptionEvidence):
+        """Add evidence and update count"""
+        self.evidence.append(evidence)
+        self.evidence_count = len(self.evidence)
+    
+    @property
+    def has_confirmed_adoption(self) -> bool:
+        """Check if there's confirmed adoption evidence"""
+        return self.status == AdoptionStatus.CONFIRMED
+    
+    @property
+    def best_evidence_url(self) -> Optional[str]:
+        """Get the highest-confidence evidence URL"""
+        if not self.evidence:
+            return None
+        sorted_evidence = sorted(self.evidence, key=lambda e: e.confidence_score, reverse=True)
+        return sorted_evidence[0].url if sorted_evidence else None
+
+
+class PenetrationMetrics(BaseModel):
+    """Aggregated penetration metrics for market research"""
+    total_agencies: int = Field(default=0, description="Total agencies in universe")
+    confirmed_count: int = Field(default=0, description="Agencies with confirmed adoption")
+    probable_count: int = Field(default=0, description="Agencies with probable adoption")
+    pilot_count: int = Field(default=0, description="Agencies in pilot/trial")
+    not_adopted_count: int = Field(default=0, description="Agencies confirmed not adopting")
+    no_data_count: int = Field(default=0, description="Agencies with insufficient data")
+    
+    # Officer-weighted metrics
+    total_officers: int = Field(default=0, description="Total officers across all agencies")
+    officers_confirmed: int = Field(default=0, description="Officers in confirmed agencies")
+    officers_probable: int = Field(default=0, description="Officers in probable agencies")
+    
+    # Penetration percentages
+    @property
+    def penetration_confirmed(self) -> float:
+        """Percentage of agencies with confirmed adoption"""
+        return (self.confirmed_count / self.total_agencies * 100) if self.total_agencies > 0 else 0.0
+    
+    @property
+    def penetration_confirmed_plus_probable(self) -> float:
+        """Percentage including both confirmed and probable"""
+        return ((self.confirmed_count + self.probable_count) / self.total_agencies * 100) if self.total_agencies > 0 else 0.0
+    
+    @property
+    def officer_penetration_confirmed(self) -> float:
+        """Percentage of officers in confirmed agencies"""
+        return (self.officers_confirmed / self.total_officers * 100) if self.total_officers > 0 else 0.0
+    
+    @property
+    def coverage_rate(self) -> float:
+        """Percentage of agencies actually researched (have data)"""
+        researched = self.total_agencies - self.no_data_count
+        return (researched / self.total_agencies * 100) if self.total_agencies > 0 else 0.0
+    
+    def to_summary_dict(self) -> Dict[str, Any]:
+        """Generate summary dictionary for reporting"""
+        return {
+            "total_agencies": self.total_agencies,
+            "confirmed_adoptions": self.confirmed_count,
+            "probable_adoptions": self.probable_count,
+            "pilot_programs": self.pilot_count,
+            "not_adopted": self.not_adopted_count,
+            "no_data": self.no_data_count,
+            "penetration_confirmed_pct": round(self.penetration_confirmed, 2),
+            "penetration_confirmed_plus_probable_pct": round(self.penetration_confirmed_plus_probable, 2),
+            "officer_penetration_pct": round(self.officer_penetration_confirmed, 2),
+            "research_coverage_pct": round(self.coverage_rate, 2),
+        }
+
+
+# =============================================================================
 # Deep Subtask Schema
 # =============================================================================
 
@@ -68,6 +273,10 @@ class DeepSubtask(BaseModel):
         default_factory=lambda: [SearchType.GENERAL],
         description="Types of searches to perform"
     )
+    search_strategy: SearchStrategy = Field(
+        default=SearchStrategy.GENERAL_WEB,
+        description="Primary search strategy for this subtask"
+    )
     expected_sources: int = Field(
         default=5,
         description="Expected number of quality sources"
@@ -84,6 +293,16 @@ class DeepSubtask(BaseModel):
     # Quality expectations
     min_findings: int = Field(default=3, description="Minimum findings required")
     target_findings: int = Field(default=7, description="Target number of findings")
+    
+    # Geographic/entity targeting (for market research)
+    target_state: Optional[str] = Field(default=None, description="Target US state for geographic decomposition")
+    target_agencies: List[str] = Field(default_factory=list, description="Specific agencies to research")
+    
+    # Dork-specific fields
+    dork_pattern: Optional[str] = Field(
+        default=None,
+        description="Google dork pattern to use (e.g., 'site:.gov \"Axon DraftOne\"')"
+    )
 
 
 class DeepResearchPlan(BaseModel):

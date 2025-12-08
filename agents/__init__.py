@@ -7,12 +7,14 @@ Provides specialized agents for the research swarm:
 - Editor Agent: Synthesizes findings into final report
 - Critic Agent: Evaluates research quality and identifies gaps
 - Domain Expert Agents: Multi-perspective analysis
+- Data Analyst Agent: Structured data extraction and penetration metrics
 - HITL Agent: Human-in-the-loop review via Slack
 """
 from .planner import PlannerAgent, ResearchPlan, Subtask
 from .worker import WorkerAgent, create_worker_agent
 from .editor import EditorAgent
 from .critic import CriticAgent
+from .analyst import DataAnalystAgent
 from .domain_experts import (
     DomainExpertAgent,
     create_expert_agent,
@@ -26,11 +28,19 @@ from .schemas import (
     ResearchPhase,
     SearchType,
     SourceAuthority,
+    AdoptionStatus,
+    SearchStrategy,
+    AgencyType,
+    EvidenceSourceType,
     # Deep planning
     DeepSubtask,
     DeepResearchPlan,
     # Quality findings
     QualityFinding,
+    # Agency adoption tracking
+    AdoptionEvidence,
+    AgencyAdoption,
+    PenetrationMetrics,
     # Critic schemas
     GapAnalysis,
     CriticEvaluation,
@@ -64,6 +74,7 @@ __all__ = [
     "EditorAgent",
     # New agents
     "CriticAgent",
+    "DataAnalystAgent",
     "DomainExpertAgent",
     "create_expert_agent",
     "create_expert_panel",
@@ -74,13 +85,21 @@ __all__ = [
     "HitlAgent",
     "HitlResult",
     "HitlDomain",
-    # Schemas
+    # Enums
     "ResearchPhase",
     "SearchType",
     "SourceAuthority",
+    "AdoptionStatus",
+    "SearchStrategy",
+    "AgencyType",
+    "EvidenceSourceType",
+    # Schemas
     "DeepSubtask",
     "DeepResearchPlan",
     "QualityFinding",
+    "AdoptionEvidence",
+    "AgencyAdoption",
+    "PenetrationMetrics",
     "GapAnalysis",
     "CriticEvaluation",
     "DraftCritique",
