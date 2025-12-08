@@ -2037,6 +2037,17 @@ def main():
                 saved_path = save_markdown_report(result, args.output)
                 print(f"\n📄 Report saved to: {saved_path}")
                 
+                # Clean up database after run
+                try:
+                    if deep_swarm and hasattr(deep_swarm, 'knowledge_tools'):
+                        cleanup_msg = deep_swarm.knowledge_tools.clear_database()
+                        print(f"🧹 {cleanup_msg}")
+                    elif swarm and hasattr(swarm, 'knowledge_tools'):
+                        cleanup_msg = swarm.knowledge_tools.clear_database()
+                        print(f"🧹 {cleanup_msg}")
+                except Exception as cleanup_error:
+                    logger.warning(f"Database cleanup failed: {cleanup_error}")
+                
             except KeyboardInterrupt:
                 print("\n\nInterrupted. Goodbye!")
                 break
@@ -2069,6 +2080,17 @@ def main():
         # Always save the run to markdown (use provided output path if set)
         saved_path = save_markdown_report(result, args.output)
         print(f"\n📄 Report saved to: {saved_path}")
+        
+        # Clean up database after run
+        try:
+            if deep_swarm and hasattr(deep_swarm, 'knowledge_tools'):
+                cleanup_msg = deep_swarm.knowledge_tools.clear_database()
+                print(f"🧹 {cleanup_msg}")
+            elif swarm and hasattr(swarm, 'knowledge_tools'):
+                cleanup_msg = swarm.knowledge_tools.clear_database()
+                print(f"🧹 {cleanup_msg}")
+        except Exception as cleanup_error:
+            logger.warning(f"Database cleanup failed: {cleanup_error}")
         
         return 0 if result.success else 1
     

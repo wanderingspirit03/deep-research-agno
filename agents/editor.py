@@ -104,9 +104,52 @@ class EditorAgent:
                 Your goal: Transform raw research findings into prose that is both **intellectually 
                 rigorous** AND **genuinely pleasurable to read**.
                 
+                ## CRITICAL: NO ASSUMPTIONS - ONLY CITE FROM DATABASE
+                
+                **STRICT RULE: NEVER MAKE UP OR ASSUME INFORMATION.**
+                
+                You are a REPORTER, not an expert. You can ONLY write about what is explicitly 
+                stated in the findings retrieved from the database. If information is not in the 
+                database, DO NOT include it in the report.
+                
+                ### CITATION INTEGRITY RULES:
+                
+                1. **ONLY cite sources that exist in the database** - check with `list_sources()`
+                2. **ONLY include statistics/data that appear in retrieved findings**
+                3. **NEVER invent percentages, numbers, or study names**
+                4. **NEVER cite sources you haven't retrieved** (no fake citations!)
+                5. **If unsure about a fact, LEAVE IT OUT** - accuracy over comprehensiveness
+                6. **Use EXACT quotes and data from findings** when possible
+                
+                ### FORBIDDEN BEHAVIORS:
+                
+                - ❌ Making up statistics ("Studies show 75%..." without source)
+                - ❌ Inventing source names ("According to Smith et al., 2024...")
+                - ❌ Assuming facts not in findings ("It is well established that...")
+                - ❌ Citing papers not retrieved from database
+                - ❌ Generalizing beyond what findings state
+                - ❌ Adding "common knowledge" not backed by retrieved data
+                
+                ## EXHAUSTIVE DATABASE RETRIEVAL
+                
+                **YOU MUST USE ALL FINDINGS FROM THE DATABASE.** The research workers have collected
+                valuable findings - your job is to synthesize ALL of them accurately.
+                
+                ### MANDATORY RETRIEVAL STEPS:
+                
+                1. **FIRST**: Call `get_findings_index()` to see ALL available research
+                2. **COUNT THE FINDINGS**: Note total count and topic coverage
+                3. **RETRIEVE EVERYTHING**: Use multiple `search_knowledge()` calls with different queries
+                   - Use `top_k=30` or higher to get comprehensive results
+                   - Search by different angles: topic, methodology, source type
+                4. **CROSS-REFERENCE**: Ensure you haven't missed any findings
+                5. **VERIFY COVERAGE**: Every unique source should be cited in your report
+                6. **DOUBLE-CHECK CITATIONS**: Only cite sources that appear in `list_sources()` output
+                
                 ## WRITING PHILOSOPHY
                 
-                **Quality over quantity.** A brilliant 4,000-word piece beats a mediocre 10,000-word dump.
+                **Comprehensive AND quality.** Include ALL research findings while maintaining excellent prose.
+                A thorough 5,000-7,000 word piece that covers all findings beats a short piece that ignores data.
                 
                 Every sentence should:
                 - Convey something meaningful (no padding)
@@ -116,29 +159,39 @@ class EditorAgent:
                 ## YOUR WORKFLOW
                 
                 You will receive a FINDINGS INDEX showing what research is available.
-                You must ACTIVELY SEARCH for detailed findings to write each section.
+                You must ACTIVELY SEARCH for ALL findings and use them in your report.
                 
                 ### Process:
                 
-                1. **REVIEW INDEX**: Understand what sources and topics exist
-                2. **IDENTIFY THE STORY**: What's the compelling narrative arc?
-                3. **PLAN SECTIONS**: Identify 4-6 major themes that build toward insight
-                4. **FOR EACH SECTION**:
-                   - Call `search_knowledge("theme keywords", top_k=15)` to get findings
-                   - Extract the most significant facts, statistics, and insights
-                   - Write a focused, well-crafted section (400-800 words)
-                   - Include inline citations [Source Title]
-                5. **POLISH**: Ensure smooth transitions and narrative cohesion
-                6. **ADD REFERENCES**: Call `list_sources()` for complete reference list
+                1. **GET FULL INDEX**: Call `get_findings_index()` to see everything available
+                2. **EXHAUSTIVE SEARCH**: Call `search_knowledge()` with multiple queries:
+                   - Main topic query (top_k=30)
+                   - Subtopic queries for each major theme (top_k=20 each)
+                   - "challenges limitations" query
+                   - "future directions trends" query
+                3. **IDENTIFY THE STORY**: What's the compelling narrative arc?
+                4. **PLAN SECTIONS**: Identify 5-7 major themes that cover ALL findings
+                5. **FOR EACH SECTION**:
+                   - Reference the specific findings you retrieved
+                   - Include ALL relevant statistics, data points, and insights
+                   - Write a comprehensive, well-crafted section (500-1000 words)
+                   - Cite EVERY source used [Source Title]
+                6. **VERIFY COMPLETENESS**: Check that all sources are cited
+                7. **ADD REFERENCES**: Call `list_sources()` for complete reference list
                 
                 ## TOOLS AVAILABLE
                 
-                - `search_knowledge(query, top_k=8)` - Search for findings (use top_k=8 to stay efficient).
+                - `search_knowledge(query, top_k=30)` - Search for findings. USE HIGH top_k VALUES!
                 - `list_sources()` - Get all source URLs for references
                 - `get_finding(id)` - Get full details of a specific finding
-                - `get_findings_index()` - Get overview of all available research
+                - `get_findings_index()` - Get overview of ALL available research (CALL THIS FIRST!)
+                - `get_findings_by_subtask(subtask_id)` - Get all findings from a specific subtask
                 
-                **IMPORTANT**: Call `search_knowledge` for EACH section. Don't write without data!
+                **CRITICAL**: 
+                - Call `get_findings_index()` FIRST to know what's available
+                - Use `top_k=30` or higher in search_knowledge() to get ALL findings
+                - Every source in the database should appear in your references
+                - Don't write sections without retrieving the relevant findings first!
                 
                 ## PROSE CRAFT GUIDELINES
                 
@@ -184,16 +237,17 @@ class EditorAgent:
                 - Define key terms naturally, within sentences
                 - Brief historical context if essential
                 
-                ### 3. Core Analysis (2000-4000 words total)
+                ### 3. Core Analysis (3000-5000 words total)
                 
-                Organize by THEME, not by source. Write 3-5 focused subsections:
+                Organize by THEME, not by source. Write 4-6 comprehensive subsections:
                 
                 For each theme:
-                - Search for relevant findings
+                - Search with high top_k (20-30) to get ALL relevant findings
+                - Include EVERY statistic, percentage, and data point
                 - Lead with the most important insight
-                - Support with specific evidence and data
+                - Support with ALL specific evidence from your search
                 - Include illuminating comparisons or contrasts
-                - Cite every significant claim [Source Title]
+                - Cite EVERY source - aim for 100% coverage of database sources
                 
                 ### 4. Tensions & Debates (400-700 words)
                 - Where do experts disagree?
@@ -217,9 +271,13 @@ class EditorAgent:
                 
                 Before finishing, verify:
                 
+                □ Did I call get_findings_index() to see ALL available research?
+                □ Did I use search_knowledge() with high top_k (20-30) for each section?
                 □ Does the opening grab attention?
                 □ Is there a clear narrative thread?
-                □ Does every section add something essential?
+                □ Does every section incorporate ALL relevant findings?
+                □ Are ALL statistics and data points from the database included?
+                □ Is EVERY source from the database cited at least once?
                 □ Are transitions smooth?
                 □ Is every claim supported with evidence and citation?
                 □ Does the conclusion resonate, not just summarize?
@@ -232,15 +290,19 @@ class EditorAgent:
                 
                 ## COMMON MISTAKES TO AVOID
                 
-                - ❌ Writing without searching first
+                - ❌ Using low top_k values (USE top_k=30 to get ALL findings!)
+                - ❌ Writing without retrieving ALL findings first
+                - ❌ Ignoring findings from the database (USE EVERYTHING!)
+                - ❌ Missing sources that are in the database
                 - ❌ Burying the lead (save the best for last)
                 - ❌ Wall-of-text paragraphs (ideal: 3-6 sentences each)
                 - ❌ Generic statements without specific evidence
-                - ❌ Missing citations
+                - ❌ Missing citations (cite EVERY source)
                 - ❌ Repetitive sentence structures
                 - ❌ Filler phrases ("It is worth noting that...")
                 - ❌ Organizing by source instead of theme
                 - ❌ Conclusions that just repeat earlier content
+                - ❌ Short reports that don't cover all the research
             """).strip(),
         ]
     
@@ -343,23 +405,29 @@ Plan sections that together tell a complete story: background → current state 
         """
         logger.info(f"Writing section: {section['title']}")
         
-        section_prompt = f"""Write a focused, well-crafted section for a research report.
+        section_prompt = f"""Write a comprehensive, well-crafted section for a research report.
 
 **Section Title:** {section['title']}
 **Focus:** {section['focus']}
 **Context:** This is part of a report on: {query}
 
-**Available Findings:**
+**Available Findings (USE ALL OF THESE):**
 {findings}
 
-**Guidelines:**
-- Write 400-800 words of polished prose
+**CRITICAL REQUIREMENTS:**
+- **USE ALL FINDINGS PROVIDED ABOVE** - every piece of data should be incorporated
+- Write 600-1200 words of polished prose to cover all the material
 - Lead with the most important/interesting finding
-- Include specific numbers, statistics, and evidence
-- Cite sources as [Source Title]
+- Include EVERY specific number, statistic, percentage, and data point from the findings
+- Cite EVERY source mentioned: [Source Title]
 - Use clear topic sentences for each paragraph
 - Vary sentence structure for readability
 - End with a transition to the next section
+
+**VERIFICATION CHECKLIST:**
+□ Did I include all statistics and numbers from the findings?
+□ Did I cite every source mentioned in the findings?
+□ Did I cover all the key points, not just a subset?
 
 Write the section now (include the ## heading):"""
 
@@ -380,11 +448,11 @@ Write the section now (include the ## heading):"""
     @observe(name="editor.synthesize")
     def synthesize(self, original_query: str, findings_index: Optional[str] = None) -> str:
         """
-        Two-pass synthesis for high-quality reports within context limits.
+        Comprehensive synthesis that uses ALL findings from the database.
         
-        Phase 1: Plan report structure (lightweight, index only)
-        Phase 2: Write each section with targeted search
-        Phase 3: Combine and add references
+        Phase 1: Get full database inventory and plan structure
+        Phase 2: Write each section with comprehensive search (high top_k)
+        Phase 3: Combine and verify all sources are cited
         
         Args:
             original_query: The original research query
@@ -399,6 +467,17 @@ Write the section now (include the ## heading):"""
         if not findings_index:
             logger.info("Generating findings index...")
             findings_index = self.knowledge_tools.get_findings_index()
+        
+        # Log database stats for verification
+        try:
+            df = self.knowledge_tools.table.to_pandas()
+            df = df[df["id"] != "init"]
+            total_findings = len(df)
+            unique_sources = len(df["source_url"].unique())
+            logger.info(f"DATABASE INVENTORY: {total_findings} findings from {unique_sources} unique sources")
+            logger.info("Editor MUST incorporate all these sources in the final report")
+        except Exception as e:
+            logger.warning(f"Could not get database stats: {e}")
         
         # =====================================================================
         # PHASE 1: Plan report structure
@@ -425,10 +504,10 @@ Write the section now (include the ## heading):"""
         for i, section in enumerate(sections_plan):
             logger.info(f"Section {i+1}/{len(sections_plan)}: {section['title']}")
             
-            # Get targeted findings for this section
+            # Get comprehensive findings for this section - use high top_k to capture all relevant data
             findings = self.knowledge_tools.search_knowledge(
                 section["search_query"],
-                top_k=8,  # Focused search
+                top_k=20,  # Comprehensive search to capture all relevant findings
                 sort_by_quality=True
             )
             
@@ -457,7 +536,24 @@ Write the section now (include the ## heading):"""
         logger.info(f"Report synthesis complete: {len(report)} chars, ~{word_count} words")
         
         if word_count < 2000:
-            logger.warning(f"Report may be too short: {word_count} words (target: 3000-7000)")
+            logger.warning(f"Report may be too short: {word_count} words (target: 5000-7000)")
+        
+        # Verify source coverage
+        try:
+            df = self.knowledge_tools.table.to_pandas()
+            df = df[df["id"] != "init"]
+            db_sources = set(df["source_title"].dropna().unique())
+            
+            # Count how many sources appear in the report
+            sources_cited = sum(1 for src in db_sources if src and src in report)
+            coverage_pct = (sources_cited / len(db_sources) * 100) if db_sources else 0
+            
+            logger.info(f"SOURCE COVERAGE: {sources_cited}/{len(db_sources)} sources cited ({coverage_pct:.0f}%)")
+            
+            if coverage_pct < 70:
+                logger.warning(f"Low source coverage ({coverage_pct:.0f}%) - some findings may be missing from report")
+        except Exception as e:
+            logger.warning(f"Could not verify source coverage: {e}")
         
         return report
     

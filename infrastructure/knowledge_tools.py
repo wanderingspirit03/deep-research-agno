@@ -646,6 +646,56 @@ class KnowledgeTools(Toolkit):
             logger.error(f"Get findings index failed: {e}")
             return f"## Error\n\n**Error:** {str(e)}"
 
+    def clear_database(self) -> str:
+        """
+        Clear all findings from the knowledge base.
+        
+        This removes all stored findings and resets the table to its initial state.
+        Useful for cleaning up between research runs.
+        
+        Returns:
+            str: Confirmation message with count of cleared findings
+        """
+        logger.info("Clearing knowledge base...")
+        
+        try:
+            # Get count before clearing
+            df = self.table.to_pandas()
+            # Exclude init record from count
+            findings_count = len(df[df["id"] != "init"])
+            
+            if findings_count == 0:
+                logger.info("Knowledge base already empty")
+                return "Knowledge base already empty."
+            
+            # Drop and recreate the table
+            table_name = "findings"
+            self.db.drop_table(table_name)
+            self._table = None  # Reset cached table reference
+            
+            # Recreate with initial record
+            initial_data = [{
+                "id": "init",
+                "content": "Initialization record",
+                "source_url": "",
+                "source_title": "",
+                "subtask_id": 0,
+                "worker_id": "system",
+                "timestamp": datetime.utcnow().isoformat(),
+                "verified": False,
+                "search_type": "init",
+                "quality_score": 0.0,
+                "vector": [0.0] * self.embedding_dimensions,
+            }]
+            self._table = self.db.create_table(table_name, data=initial_data)
+            
+            logger.info(f"Cleared {findings_count} findings from knowledge base")
+            return f"✅ Cleared {findings_count} findings from knowledge base."
+            
+        except Exception as e:
+            logger.error(f"Clear database failed: {e}")
+            return f"❌ Error clearing database: {str(e)}"
+
 
 # =============================================================================
 # Quick Test
